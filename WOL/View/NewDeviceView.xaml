@@ -1,0 +1,62 @@
+﻿<Window x:Class="WOL.View.NewDeviceView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:WOL.View"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="NewDeviceView"
+        Width="550"
+        Height="450"
+        Background="{StaticResource Gray100}"
+        mc:Ignorable="d">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  헤더  -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Style="{StaticResource Heading2}" Text="새 디바이스 생성" />
+            <TextBlock Margin="0,4,0,0"
+                       Style="{StaticResource BodyText}"
+                       Text="새로운 디바이스 정보를 입력해주세요." />
+        </StackPanel>
+
+        <!--  입력 폼  -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource Heading3}" Text="디바이스 이름" />
+                <TextBox Margin="0,4,0,16"
+                         Style="{StaticResource BodyText2}"
+                         Text="{Binding Device.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Style="{StaticResource Heading3}" Text="IP" />
+                <TextBox Margin="0,4,0,16"
+                         Style="{StaticResource BodyText2}"
+                         Text="{Binding Device.IP, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Style="{StaticResource Heading3}" Text="MAC" />
+                <TextBox Margin="0,4,0,16"
+                         Style="{StaticResource BodyText2}"
+                         Text="{Binding Device.MAC, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            </StackPanel>
+        </Border>
+
+        <!--  버튼  -->
+        <StackPanel Grid.Row="2"
+                    Margin="0,24,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <Button Margin="0,0,8,0"
+                    Content="취소"
+                    IsCancel="True"
+                    Style="{StaticResource DangerButton}" />
+            <Button Command="{Binding SetDeviceInfoCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                    Content="확인"
+                    Style="{StaticResource PrimaryButton}" />
+        </StackPanel>
+    </Grid>
+</Window>

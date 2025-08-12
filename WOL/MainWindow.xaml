@@ -1,0 +1,246 @@
+<Window x:Class="WOL.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:WOL.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:WOL"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:WOL.ViewModels"
+        xmlns:views="clr-namespace:WOL.View"
+        Title="WOL 원격 관리 시스템"
+        Width="1400"
+        Height="800"
+        Background="{StaticResource Gray100}"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d">
+
+    <Window.Resources>
+        <converters:EqualityConverter x:Key="EqualityConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  헤더  -->
+        <Border Grid.Row="0"
+                Padding="24,16"
+                Background="{StaticResource White}"
+                BorderBrush="{StaticResource Gray200}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Style="{StaticResource Heading1}" Text="WOL 원격 관리 시스템" />
+                    <TextBlock Margin="0,4,0,0"
+                               Style="{StaticResource BodyText}"
+                               Text="Wake on LAN 및 프로그램 원격 실행 관리" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Command="{Binding CreateProjectCommand}"
+                        Content="새 프로젝트 생성"
+                        Style="{StaticResource PrimaryButton}" />
+            </Grid>
+        </Border>
+
+        <!--  메인 콘텐츠  -->
+        <Grid Grid.Row="1" Margin="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  프로젝트 목록  -->
+            <Border Grid.Column="0"
+                    Margin="0,0,12,0"
+                    Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,16"
+                               Style="{StaticResource Heading3}"
+                               Text="프로젝트 목록" />
+                    <ScrollViewer MaxHeight="600" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Projects}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,12"
+                                            Padding="16"
+                                            Background="{StaticResource White}"
+                                            BorderBrush="{StaticResource Gray200}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Cursor="Hand">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Value="True">
+                                                        <DataTrigger.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                                                <Binding Path="DataContext.SelectedProject.Id" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                                <Binding Path="Id" />
+                                                            </MultiBinding>
+                                                        </DataTrigger.Binding>
+                                                        <Setter Property="Background" Value="#EBF8FF" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlue}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           FontSize="16"
+                                                           FontWeight="Semibold"
+                                                           Text="{Binding Name}" />
+                                            </Grid>
+                                            <TextBlock Grid.Row="1"
+                                                       Margin="0,8,0,12"
+                                                       Style="{StaticResource BodyText}"
+                                                       Text="{Binding Description}" />
+                                            <Grid Grid.Row="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="1"
+                                                        Margin="12,0,0,0"
+                                                        Command="{Binding DataContext.UpdateProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="수정"
+                                                        Style="{StaticResource WarningButton}" />
+                                                <Button Grid.Column="2"
+                                                        Margin="12,0,0,0"
+                                                        Command="{Binding DataContext.DeleteProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="삭제"
+                                                        Style="{StaticResource DangerButton}" />
+                                            </Grid>
+                                        </Grid>
+                                        <Border.InputBindings>
+                                            <MouseBinding Command="{Binding DataContext.SelectProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          CommandParameter="{Binding}"
+                                                          MouseAction="LeftClick" />
+                                        </Border.InputBindings>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!--  프로젝트 상세  -->
+            <Border Grid.Column="1"
+                    Margin="12,0,0,0"
+                    Style="{StaticResource CardStyle}">
+                <Grid>
+                    <!--  프로젝트 정보가 없을 때  -->
+                    <Border Padding="48"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="{StaticResource White}"
+                            BorderBrush="{StaticResource Gray200}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Visibility="{Binding SelectedProject, Converter={StaticResource NullToVisibilityConverter}}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Margin="0,0,0,16"
+                                       HorizontalAlignment="Center"
+                                       FontSize="32"
+                                       Text="📁" />
+                            <TextBlock Margin="0,0,0,8"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource Heading3}"
+                                       Text="프로젝트를 선택해주세요" />
+                            <TextBlock MaxWidth="300"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource BodyText}"
+                                       Text="좌측 목록에서 관리할 프로젝트를 선택하시거나 새 프로젝트를 생성해주세요."
+                                       TextAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--  프로젝트 상세 정보  -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding SelectedProject, Converter={StaticResource NotNullToVisibilityConverter}}">
+                        <StackPanel>
+                            <!--  프로젝트 헤더  -->
+                            <StackPanel Margin="0,0,0,24">
+                                <TextBlock Style="{StaticResource Heading2}" Text="{Binding SelectedProject.Name}" />
+                                <TextBlock Margin="0,4,0,0"
+                                           Style="{StaticResource BodyText}"
+                                           Text="{Binding SelectedProject.Description}" />
+                            </StackPanel>
+
+                            <!--  전체 제어 패널  -->
+                            <Border Margin="0,0,0,24"
+                                    Padding="16"
+                                    Background="{StaticResource Gray100}"
+                                    CornerRadius="8">
+                                <StackPanel>
+                                    <TextBlock Margin="0,0,0,12"
+                                               Style="{StaticResource Heading3}"
+                                               Text="프로젝트 전체 제어" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                            <TextBlock Margin="0,0,0,8"
+                                                       FontWeight="Medium"
+                                                       Style="{StaticResource BodyText}"
+                                                       Text="디바이스 제어" />
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Margin="0,0,8,0"
+                                                        Command="{Binding DeviceViewModel.WakeAllDevicesCommand}"
+                                                        Content="전체 Wake on LAN"
+                                                        Style="{StaticResource SuccessButton}" />
+                                                <Button Command="{Binding DeviceViewModel.ShutdownAllDevicesCommand}"
+                                                        Content="전체 종료"
+                                                        Style="{StaticResource DangerButton}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                            <TextBlock Margin="0,0,0,8"
+                                                       FontWeight="Medium"
+                                                       Style="{StaticResource BodyText}"
+                                                       Text="프로그램 제어" />
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Margin="0,0,8,0"
+                                                        Command="{Binding ProgramViewModel.StartAllProgramsCommand}"
+                                                        Content="모든 프로그램 실행"
+                                                        Style="{StaticResource PrimaryButton}" />
+                                                <Button Command="{Binding ProgramViewModel.StopAllProgramsCommand}"
+                                                        Content="모든 프로그램 중지"
+                                                        Style="{StaticResource WarningButton}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <views:DeviceView DataContext="{Binding DeviceViewModel}" />
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
