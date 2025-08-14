@@ -39,8 +39,8 @@ WOL/
 │   └───WakeOnLanService.cs # WOL 패킷 전송 및 하트비트 수신 처리
 ├───Styles/                 # WPF UI 스타일 및 템플릿
 ├───View/                   # WPF 사용자 인터페이스 (XAML 파일)
-├───ViewModels/             # View와 Data를 연결하는 ViewModel (MainViewModel, DeviceViewModel 등)
-└───WOLClient/              # (별도 프로젝트) 장치에서 실행되는 하트비트 송신 클라이언트
+└───ViewModels/             # View와 Data를 연결하는 ViewModel (MainViewModel, DeviceViewModel 등)
+WOLClient/              # (별도 프로젝트) 장치에서 실행되는 하트비트 송신 클라이언트
 ```
 
 ## 시작하기
