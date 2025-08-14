@@ -1,3 +1,4 @@
+using WOL.Models;
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -9,11 +10,17 @@ namespace WOL.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is int count)
+            if (value is DeviceStatus status)
             {
-                return count > 0 ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Gray);
+                switch (status)
+                {
+                    case DeviceStatus.Online:
+                        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
+                    case DeviceStatus.Offline:
+                        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280"));
+                }
             }
-            
+
             return new SolidColorBrush(Colors.Gray);
         }
 

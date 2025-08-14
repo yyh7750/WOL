@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WOL.Data.Repositories.Interface;
 using WOL.Models;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -45,7 +44,7 @@ namespace WOL.Data.Repositories
         public async Task DeleteDeviceAsync(int id)
         {
             Device? device = await _context.Device.FindAsync(id) ?? throw new KeyNotFoundException($"Device with ID {id} not found.");
-            _context.Device.Remove(new Device { Id = id });
+            _context.Device.Remove(device);
             await _context.SaveChangesAsync();
         }
     }

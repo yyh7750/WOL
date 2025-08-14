@@ -26,6 +26,18 @@ namespace WOL
             base.OnStartup(e);
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
+
+            // 클라이언트로부터 핑 수신 시작
+            var wakeOnLanService = ServiceProvider.GetRequiredService<IWakeOnLanService>();
+            wakeOnLanService.StartHeartbeatListener();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            // 클라이언트로부터 핑 수신 중지
+            var wakeOnLanService = ServiceProvider.GetRequiredService<IWakeOnLanService>();
+            wakeOnLanService.StopHeartbeatListener();
+            base.OnExit(e);
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -39,6 +51,7 @@ namespace WOL
             services.AddSingleton<IWakeOnLanService, WakeOnLanService>();
             services.AddSingleton<IDataService, DataService>();
             services.AddSingleton<IDeviceService, DeviceService>();
+            services.AddSingleton<IIniService, IniService>();
 
             // Repository 등록
             services.AddSingleton<IProjectRepository, ProjectRepository>();

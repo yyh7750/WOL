@@ -74,9 +74,6 @@ namespace WOL.Models
             set => SetProperty(ref _programs, value);
         }
 
-        public string StatusText => Status == DeviceStatus.Online ? "온라인" : "오프라인";
-        public string StatusColor => Status == DeviceStatus.Online ? "#10B981" : "#6B7280";
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

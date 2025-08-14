@@ -1,6 +1,5 @@
 using WOL.Commands;
 using WOL.Models;
-using WOL.Services;
 using WOL.Services.Interface;
 using WOL.View;
 using System.Collections.ObjectModel;
@@ -8,6 +7,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System;
+using System.Windows;
 
 namespace WOL.ViewModels
 {
@@ -32,18 +33,19 @@ namespace WOL.ViewModels
             _dataService = dataService;
             _newDeviceViewModel = newDeviceViewModel;
             _deviceService = deviceService;
+            _deviceService.DeviceStatusChanged += OnDeviceStatusChanged;
 
             AddDeviceCommand = new RelayCommand(async () => await AddDeviceAsync(), () => _currentProject != null);
             UpdateDeviceCommand = new RelayCommand<Device>(async (d) => await UpdateDeviceAsync(d), (d) => d != null);
             DeleteDeviceCommand = new RelayCommand<Device>(async (d) => await DeleteDeviceAsync(d), (d) => d != null);
             WakeAllDevicesCommand = new RelayCommand(async () => await WakeAllDevices(), () => _currentProject != null);
             ShutdownAllDevicesCommand = new RelayCommand(async () => await ShutdownAllDevices(), () => _currentProject != null);
-            _deviceService = deviceService;
-
         }
 
         public void LoadDevicesForProject(Project project)
         {
+            ArgumentNullException.ThrowIfNull(project);
+
             _currentProject = project;
             Devices.Clear();
             if (project?.Devices != null)
@@ -53,6 +55,8 @@ namespace WOL.ViewModels
                     Devices.Add(device);
                 }
             }
+
+            _deviceService.SetCurrentProject(_currentProject);
         }
 
         private async Task AddDeviceAsync()
@@ -87,7 +91,7 @@ namespace WOL.ViewModels
             if (deviceView.ShowDialog() == true)
             {
                 await _dataService.DeviceRepository.UpdateDeviceAsync(_newDeviceViewModel.Device);
-                LoadDevicesForProject(_currentProject); // 목록 새로고침
+                LoadDevicesForProject(_currentProject);
             }
         }
 
@@ -104,8 +108,24 @@ namespace WOL.ViewModels
         }
 
         private async Task ShutdownAllDevices()
-        { 
-            // All Shut down logic
+        {
+            if (_currentProject == null) return;
+            await Task.Run(() => _deviceService.ShutdownAllDevices(_currentProject));
+        }
+
+        private void OnDeviceStatusChanged(Device device)
+        {
+            if (_currentProject == null || device.ProjectId != _currentProject.Id) return;
+
+            if (_currentProject.Devices.Contains(device))
+            {
+                _currentProject.Devices[_currentProject.Devices.IndexOf(device)] = device;
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LoadDevicesForProject(_currentProject);
+                });
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
