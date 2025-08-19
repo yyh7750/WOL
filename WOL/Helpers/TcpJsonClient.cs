@@ -22,17 +22,17 @@ namespace WOL.Helpers
 		public async Task<T?> SendAsync<T>(object request, CancellationToken ct = default)
 		{
 			if (_stream is null) throw new InvalidOperationException("Not connected");
-			var payload = JsonSerializer.SerializeToUtf8Bytes(request);
-			var len = new byte[] { (byte)(payload.Length >> 24), (byte)(payload.Length >> 16), (byte)(payload.Length >> 8), (byte)payload.Length };
+			byte[] payload = JsonSerializer.SerializeToUtf8Bytes(request);
+			byte[] len = [(byte)(payload.Length >> 24), (byte)(payload.Length >> 16), (byte)(payload.Length >> 8), (byte)payload.Length];
 			await _stream.WriteAsync(len, ct);
 			await _stream.WriteAsync(payload, ct);
 			await _stream.FlushAsync(ct);
 
-			var lenBuf = new byte[4];
+			byte[] lenBuf = new byte[4];
 			await ReadExactAsync(lenBuf, 4, ct);
 			int rlen = (lenBuf[0] << 24) | (lenBuf[1] << 16) | (lenBuf[2] << 8) | lenBuf[3];
 
-			var data = new byte[rlen];
+			byte[] data = new byte[rlen];
 			await ReadExactAsync(data, rlen, ct);
 			return JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 		}

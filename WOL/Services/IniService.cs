@@ -35,22 +35,22 @@ namespace WOL.Services
 				return;
 			}
 
-			foreach (var line in File.ReadAllLines(_configPath))
+			foreach (string line in File.ReadAllLines(_configPath))
 			{
-				var parts = line.Split('=');
+				string[] parts = line.Split('=');
 				if (parts.Length != 2) continue;
-				var key = parts[0].Trim();
-				var value = parts[1].Trim();
+				string key = parts[0].Trim();
+				string value = parts[1].Trim();
 				if (key.Equals("SERVER_IP", StringComparison.OrdinalIgnoreCase)) ServerIp = value;
-				else if (key.Equals("HEARTBEAT_RECV_PORT", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out var p1)) HeartbeatRecvPort = p1;
-				else if (key.Equals("SHUTDOWN_SEND_PORT", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out var p2)) ShutdownSendPort = p2;
-				else if (key.Equals("FILE_SELECT_PORT", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out var p3)) FileSelectPort = p3;
+				else if (key.Equals("HEARTBEAT_RECV_PORT", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out int p1)) HeartbeatRecvPort = p1;
+				else if (key.Equals("SHUTDOWN_SEND_PORT", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out int p2)) ShutdownSendPort = p2;
+				else if (key.Equals("FILE_SELECT_PORT", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out int p3)) FileSelectPort = p3;
 			}
 		}
 
 		public void CreateDefaultConfig()
 		{
-			using var writer = new StreamWriter(_configPath);
+			using StreamWriter writer = new(_configPath);
 			writer.WriteLine("[CONFIG]");
 			writer.WriteLine("SERVER_IP = 192.168.1.2");
 			writer.WriteLine("HEARTBEAT_RECV_PORT = 12358");

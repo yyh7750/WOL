@@ -39,10 +39,10 @@ namespace WOLClient.Services
                 return;
             }
 
-            var lines = File.ReadAllLines(_configPath);
-            foreach (var line in lines)
+            string[] lines = File.ReadAllLines(_configPath);
+            foreach (string line in lines)
             {
-                var parts = line.Split('=');
+                string[] parts = line.Split('=');
                 if (parts.Length == 2)
                 {
                     string key = parts[0].Trim();
@@ -79,7 +79,7 @@ namespace WOLClient.Services
 
         private void CreateDefaultConfig()
         {
-            using (var writer = new StreamWriter(_configPath))
+            using (StreamWriter writer = new(_configPath))
             {
                 writer.WriteLine("[CONFIG]");
                 writer.WriteLine("SERVER_IP = 192.168.1.2");

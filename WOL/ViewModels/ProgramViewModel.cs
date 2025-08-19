@@ -7,6 +7,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Collections.Generic;
+using System;
 
 namespace WOL.ViewModels
 {
@@ -45,8 +47,8 @@ namespace WOL.ViewModels
             Programs.Clear();
             if (project?.Devices != null)
             {
-                var programs = project.Devices.SelectMany(d => d.Programs);
-                foreach (var program in programs)
+                IEnumerable<Program> programs = project.Devices.SelectMany(d => d.Programs);
+                foreach (Program program in programs)
                 {
                     Programs.Add(program);
                 }
@@ -57,15 +59,15 @@ namespace WOL.ViewModels
         {
             if (device == null) return;
 
-            var dialogResult = await _remoteExplorerService.ShowRemoteExplorerDialogAsync(device);
-            var result = dialogResult.Item1;
-            var selectedFiles = dialogResult.Item2;
+            Tuple<bool?, List<EntryDto>> dialogResult = await _remoteExplorerService.ShowRemoteExplorerDialogAsync(device);
+            bool? result = dialogResult.Item1;
+            List<EntryDto> selectedFiles = dialogResult.Item2;
 
             if (result == true && selectedFiles.Count > 0)
             {
-                foreach (var f in selectedFiles)
+                foreach (EntryDto f in selectedFiles)
                 {
-                    var newProgram = new Program
+                    Program newProgram = new()
                     {
                         Name = System.IO.Path.GetFileNameWithoutExtension(f.FullPath),
                         Path = f.FullPath,

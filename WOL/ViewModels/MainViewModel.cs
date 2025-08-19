@@ -61,9 +61,9 @@ namespace WOL.ViewModels
 
         private async Task LoadDataAsync()
         {
-            var projects = await _dataService.ProjectRepository.GetAllProjectsAsync();
+            List<Project> projects = await _dataService.ProjectRepository.GetAllProjectsAsync();
             Projects.Clear();
-            foreach (var project in projects)
+            foreach (Project project in projects)
             {
                 Projects.Add(project);
             }
@@ -75,14 +75,14 @@ namespace WOL.ViewModels
         private async Task CreateProjectAsync()
         {
             _newProjectViewModel.Initialize(); // 새 프로젝트를 위해 ViewModel 상태 초기화
-            var projectView = new NewProjectView
+            NewProjectView projectView = new()
             {
                 DataContext = _newProjectViewModel
             };
 
             if (projectView.ShowDialog() == true)
             {
-                var newProject = _newProjectViewModel.Project;
+                Project newProject = _newProjectViewModel.Project;
                 await _dataService.ProjectRepository.AddProjectAsync(newProject);
                 Projects.Add(newProject);
                 SelectedProject = newProject;
@@ -92,7 +92,7 @@ namespace WOL.ViewModels
         private async Task UpdateProjectAsync(Project project)
         {
             _newProjectViewModel.Initialize(project); // 기존 프로젝트 데이터로 ViewModel 상태 설정
-            var projectView = new NewProjectView
+            NewProjectView projectView = new()
             {
                 DataContext = _newProjectViewModel
             };

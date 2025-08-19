@@ -42,13 +42,13 @@ namespace WOL.ViewModels
             ConnectCommand = new RelayCommand(async () => await ConnectAsync());
             NavigateCommand = new RelayCommand(async () => await NavigateAsync(CurrentPath), () => _connected);
             OkCommand = new RelayCommand(() => ConfirmSelection(), () => CanConfirmSelection());
-            CancelCommand = new RelayCommand(() => { foreach (var e in Entries) e.IsSelected = false; UpdateSelectionInfo(); });
+            CancelCommand = new RelayCommand(() => { foreach (EntryItem e in Entries) e.IsSelected = false; UpdateSelectionInfo(); });
             GoUpCommand = new RelayCommand(async () => await GoUpAsync(), () => _connected && CanGoUp());
         }
 
         private bool CanConfirmSelection()
         {
-            var selected = Entries.Where(x => x.IsSelected).ToList();
+            List<EntryItem> selected = Entries.Where(x => x.IsSelected).ToList();
             return selected.Count != 0 && selected.All(x => !x.IsDirectory);
         }
 
@@ -70,7 +70,7 @@ namespace WOL.ViewModels
         {
             List<EntryDto> resp = await _tcp.SendAsync<List<EntryDto>>(new { Type = "Roots" }) ?? [];
             TreeRoots.Clear();
-            foreach (var r in resp.Where(x => x.IsDirectory))
+            foreach (EntryDto r in resp.Where(x => x.IsDirectory))
                 TreeRoots.Add(new TreeNode(r.FullPath, r.Name, this));
             if (TreeRoots.Count > 0)
             {

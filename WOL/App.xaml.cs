@@ -19,7 +19,7 @@ namespace WOL
 
         public App()
         {
-            var serviceCollection = new ServiceCollection();
+            ServiceCollection serviceCollection = new();
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
         }
@@ -27,18 +27,18 @@ namespace WOL
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            MainWindow mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
             // 클라이언트로부터 핑 수신 시작
-            var wakeOnLanService = ServiceProvider.GetRequiredService<IWakeOnLanService>();
+            IWakeOnLanService wakeOnLanService = ServiceProvider.GetRequiredService<IWakeOnLanService>();
             wakeOnLanService.StartHeartbeatListener();
         }
 
         protected override async void OnExit(ExitEventArgs e)
         {
             // 클라이언트로부터 핑 수신 중지
-            var wakeOnLanService = ServiceProvider.GetRequiredService<IWakeOnLanService>();
+            IWakeOnLanService wakeOnLanService = ServiceProvider.GetRequiredService<IWakeOnLanService>();
             wakeOnLanService.StopHeartbeatListener();
 
             if (ServiceProvider is IAsyncDisposable asyncDisposable)
@@ -55,7 +55,7 @@ namespace WOL
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
+            string connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             );

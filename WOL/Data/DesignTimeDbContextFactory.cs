@@ -8,8 +8,8 @@ namespace WOL.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            var connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
+            DbContextOptionsBuilder<AppDbContext> optionsBuilder = new();
+            string connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
             return new AppDbContext(optionsBuilder.Options);

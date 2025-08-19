@@ -20,13 +20,13 @@ namespace WOL.Services
 
         public async Task<Tuple<bool?, List<EntryDto>>> ShowRemoteExplorerDialogAsync(Device device)
         {
-            var scope = _scopeFactory.CreateScope();
+            IServiceScope scope = _scopeFactory.CreateScope();
             try
             {
-                var remoteExplorerViewModel = scope.ServiceProvider.GetRequiredService<RemoteExplorerViewModel>();
-                var iniService = scope.ServiceProvider.GetRequiredService<IIniService>();
+                RemoteExplorerViewModel remoteExplorerViewModel = scope.ServiceProvider.GetRequiredService<RemoteExplorerViewModel>();
+                IIniService iniService = scope.ServiceProvider.GetRequiredService<IIniService>();
 
-                var picker = new RemoteExplorerView
+                RemoteExplorerView picker = new()
                 {
                     Owner = System.Windows.Application.Current?.MainWindow,
                     DataContext = remoteExplorerViewModel

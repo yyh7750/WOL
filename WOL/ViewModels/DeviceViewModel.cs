@@ -50,7 +50,7 @@ namespace WOL.ViewModels
             Devices.Clear();
             if (project?.Devices != null)
             {
-                foreach (var device in project.Devices)
+                foreach (Device device in project.Devices)
                 {
                     Devices.Add(device);
                 }
@@ -64,14 +64,14 @@ namespace WOL.ViewModels
             if (_currentProject == null) return;
 
             _newDeviceViewModel.Initialize(); // 새 디바이스를 위해 ViewModel 상태 초기화
-            var deviceView = new NewDeviceView
+            NewDeviceView deviceView = new()
             {
                 DataContext = _newDeviceViewModel
             };
 
             if (deviceView.ShowDialog() == true)
             {
-                var newDevice = _newDeviceViewModel.Device;
+                Device newDevice = _newDeviceViewModel.Device;
                 newDevice.ProjectId = _currentProject.Id;
                 await _dataService.DeviceRepository.AddDeviceAsync(newDevice);
                 Devices.Add(newDevice);
@@ -83,7 +83,7 @@ namespace WOL.ViewModels
             if (_currentProject == null) return;
 
             _newDeviceViewModel.Initialize(device); // 기존 디바이스 데이터로 ViewModel 상태 설정
-            var deviceView = new NewDeviceView
+            NewDeviceView deviceView = new()
             {
                 DataContext = _newDeviceViewModel
             };
