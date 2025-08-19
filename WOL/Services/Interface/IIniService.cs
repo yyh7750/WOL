@@ -5,6 +5,8 @@ namespace WOL.Services.Interface
     {
         int ShutdownSendPort { get; }
         int HeartbeatRecvPort { get; }
+        int FileSelectPort { get; }
+        string ServerIp { get; }
         void LoadConfig();
         void CreateDefaultConfig();
     }

@@ -1,4 +1,3 @@
-using Microsoft.Win32;
 using WOL.Commands;
 using WOL.Models;
 using WOL.Services.Interface;
@@ -14,6 +13,7 @@ namespace WOL.ViewModels
     public class ProgramViewModel : INotifyPropertyChanged
     {
         private readonly IDataService _dataService;
+        private readonly IRemoteExplorerService _remoteExplorerService;
         private Project? _currentProject;
 
         public ObservableCollection<Program> Programs { get; } = [];
@@ -26,9 +26,10 @@ namespace WOL.ViewModels
         public ICommand StartProgramCommand { get; }
         public ICommand StopProgramCommand { get; }
 
-        public ProgramViewModel(IDataService dataService)
+        public ProgramViewModel(IDataService dataService, IRemoteExplorerService remoteExplorerService)
         {
             _dataService = dataService;
+            _remoteExplorerService = remoteExplorerService;
 
             AddProgramCommand = new RelayCommand<Device>(async (d) => await AddProgramAsync(d), (d) => d != null);
             DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p));
@@ -56,22 +57,22 @@ namespace WOL.ViewModels
         {
             if (device == null) return;
 
-            var openFileDialog = new OpenFileDialog { Multiselect = true, Filter = "All files (*.*)|*.*" };
-            if (openFileDialog.ShowDialog() == true)
+            var dialogResult = await _remoteExplorerService.ShowRemoteExplorerDialogAsync(device);
+            var result = dialogResult.Item1;
+            var selectedFiles = dialogResult.Item2;
+
+            if (result == true && selectedFiles.Count > 0)
             {
-                foreach (string filename in openFileDialog.FileNames)
+                foreach (var f in selectedFiles)
                 {
                     var newProgram = new Program
                     {
-                        Name = System.IO.Path.GetFileNameWithoutExtension(filename),
-                        Path = filename,
+                        Name = System.IO.Path.GetFileNameWithoutExtension(f.FullPath),
+                        Path = f.FullPath,
                         Status = ProgramStatus.Stopped,
                         DeviceId = device.Id
                     };
                     await _dataService.ProgramRepository.AddProgramAsync(newProgram);
-                    
-                    // UI 갱신을 위해 Device의 Programs 컬렉션과 ProgramViewModel의 Programs 컬렉션 모두에 추가
-                    device.Programs.Add(newProgram);
                     Programs.Add(newProgram);
                 }
             }

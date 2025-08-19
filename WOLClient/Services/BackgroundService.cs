@@ -8,10 +8,12 @@ namespace WOLClient.Services
     {
         private const uint SHUTDOWN_MESSAGE = 0x010;
         private const uint ALIVE_MESSAGE = 0x020;
+        private const int FILE_SERVER_PORT_DEFAULT = 6060;
         private const int HEARTBEAT_INTERVAL_MS = 1000;
 
         private UdpClient? _udpListener;
         private System.Timers.Timer? _timer;
+        private TcpFileServer? _fileServer;
         private readonly CancellationTokenSource _cts;
         private readonly IniService _iniService;
 
@@ -29,6 +31,11 @@ namespace WOLClient.Services
             _timer.Elapsed += SendHeartbeat;
             _timer.AutoReset = true;
             _timer.Enabled = true;
+
+            // start TCP file server for remote file picking
+            _fileServer = new TcpFileServer();
+            int port = _iniService.FileSelectPort > 0 ? _iniService.FileSelectPort : FILE_SERVER_PORT_DEFAULT;
+            _fileServer.Start(port);
         }
 
         public void Stop()
@@ -38,6 +45,7 @@ namespace WOLClient.Services
             _timer?.Dispose();
             _udpListener?.Close();
             _udpListener?.Dispose();
+            _fileServer?.Stop();
         }
 
         private async Task ListenForShutdownMessages(CancellationToken cancellationToken)
