@@ -35,8 +35,9 @@ namespace WOL.Services
                 remoteExplorerViewModel.ClientHost = device.IP;
                 remoteExplorerViewModel.ClientPort = iniService.FileSelectPort > 0 ? iniService.FileSelectPort : 6060;
 
+                await remoteExplorerViewModel.ConnectAsync();
                 bool? result = picker.ShowDialog();
-                List<EntryDto> selectedFiles = result == true ? remoteExplorerViewModel.SelectedFiles : new List<EntryDto>();
+                List<EntryDto> selectedFiles = result == true ? remoteExplorerViewModel.SelectedFiles : [];
 
                 return Tuple.Create(result, selectedFiles);
             }

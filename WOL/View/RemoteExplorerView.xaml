@@ -17,6 +17,7 @@
                        Text="Client:" />
             <TextBox Width="220"
                      Margin="0,0,8,0"
+                     IsReadOnly="True"
                      Text="{Binding ClientHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Margin="0,0,6,0"
                        VerticalAlignment="Center"
