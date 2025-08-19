@@ -9,6 +9,7 @@ namespace WOLClient.Services
     {
         private TcpListener? _listener;
         private bool _running;
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         public void Start(int port)
         {
@@ -68,7 +69,7 @@ namespace WOLClient.Services
                         _ => new { error = "BadRequest", message = "Unknown Type" }
                     };
 
-                    byte[] payload = JsonSerializer.SerializeToUtf8Bytes(response, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                    byte[] payload = JsonSerializer.SerializeToUtf8Bytes(response, _jsonSerializerOptions);
                     byte[] outLen = [(byte)(payload.Length >> 24), (byte)(payload.Length >> 16), (byte)(payload.Length >> 8), (byte)payload.Length];
                     await stream.WriteAsync(outLen);
                     await stream.WriteAsync(payload);
@@ -108,7 +109,7 @@ namespace WOLClient.Services
             }
             catch 
             { 
-                dirs = Enumerable.Empty<object>(); 
+                dirs = []; 
             }
             try 
             { 
@@ -116,7 +117,7 @@ namespace WOLClient.Services
             }
             catch 
             { 
-                files = Enumerable.Empty<object>(); 
+                files = []; 
             }
 
             return dirs.Concat(files)
