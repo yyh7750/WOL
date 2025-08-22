@@ -18,23 +18,21 @@ namespace WOL.View
         {
             base.OnActivated(e);
             if (DataContext is RemoteExplorerViewModel vm && !vm.FilesSelectedHasSubscriber)
-            {
+            { 
                 vm.FilesSelected += files => { SelectedFiles = files; DialogResult = true; Close(); };
                 vm.FilesSelectedHasSubscriber = true;
             }
         }
 
-        private async void ListViewItem_DoubleClick(object sender, MouseButtonEventArgs e)
+        private void ListViewItem_DoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is ListViewItem lvi && lvi.DataContext is EntryItem item && DataContext is RemoteExplorerViewModel vm)
+            if (DataContext is RemoteExplorerViewModel vm && sender is ListViewItem lvi && lvi.DataContext is EntryItem item)
             {
-                if (item.IsDirectory || item.IsParentFolder)
+                if (vm.DoubleClickItemCommand.CanExecute(item))
                 {
-                    await vm.NavigateAsync(item.FullPath);
+                    vm.DoubleClickItemCommand.Execute(item);
                 }
             }
         }
     }
 }
-
-

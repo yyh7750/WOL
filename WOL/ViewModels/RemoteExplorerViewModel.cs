@@ -34,6 +34,8 @@ namespace WOL.ViewModels
         public RelayCommand OkCommand { get; }
         public RelayCommand CancelCommand { get; }
         public RelayCommand GoUpCommand { get; }
+        public RelayCommand<EntryItem> DoubleClickItemCommand { get; }
+        public RelayCommand<TreeNode> RootItemDoubleClickCommand { get; }
 
         public RemoteExplorerViewModel(ITcpJsonClient tcpJsonClient)
         {
@@ -44,6 +46,16 @@ namespace WOL.ViewModels
             OkCommand = new RelayCommand(() => ConfirmSelection(), () => CanConfirmSelection());
             CancelCommand = new RelayCommand(() => { foreach (EntryItem e in Entries) e.IsSelected = false; UpdateSelectionInfo(); });
             GoUpCommand = new RelayCommand(async () => await GoUpAsync(), () => _connected && CanGoUp());
+            DoubleClickItemCommand = new RelayCommand<EntryItem>(async (item) => await DoubleClickItemAsync(item), (item) => item != null);
+            RootItemDoubleClickCommand = new RelayCommand<TreeNode>(async (node) => await ExpandTreeNodeAsync(node), (node) => node != null);
+        }
+
+        private async Task DoubleClickItemAsync(EntryItem item)
+        {
+            if (item.IsDirectory || item.IsParentFolder)
+            {
+                await NavigateAsync(item.FullPath);
+            }
         }
 
         private bool CanConfirmSelection()
@@ -109,6 +121,28 @@ namespace WOL.ViewModels
             {
                 await NavigateAsync(parent);
             }
+        }
+
+        private async Task ExpandTreeNodeAsync(TreeNode node)
+        {
+            if (node == null) return;
+
+            await NavigateAsync(node.FullPath);
+
+            if (node.Children.Any())
+            {
+                node.IsExpanded = true;
+                return;
+            }
+
+            List<EntryDto> list = await _tcp.SendAsync<List<EntryDto>>(new { Type = "List", Path = node.FullPath, Skip = 0, Take = 500 }) ?? [];
+
+            foreach (EntryDto e in list.Where(x => x.IsDirectory))
+            {
+                node.Children.Add(new TreeNode(e.FullPath, e.Name, this));
+            }
+
+            node.IsExpanded = true;
         }
 
         private void ConfirmSelection()
@@ -192,11 +226,18 @@ namespace WOL.ViewModels
         void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
     }
 
-    public class TreeNode
+    public class TreeNode : INotifyPropertyChanged
     {
         public string Name { get; }
         public string FullPath { get; }
-        public ObservableCollection<TreeNode> Children { get; } = new();
+        public ObservableCollection<TreeNode> Children { get; } = [];
+
+        private bool _isExpanded;
+        public bool IsExpanded { get => _isExpanded; set { _isExpanded = value; OnPropertyChanged(); } }
+
         public TreeNode(string fullPath, string name, RemoteExplorerViewModel vm) { FullPath = fullPath; Name = name; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
     }
 }
