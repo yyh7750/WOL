@@ -66,6 +66,7 @@ namespace WOL
             services.AddSingleton<IDeviceService, DeviceService>();
             services.AddSingleton<IIniService, IniService>();
             services.AddSingleton<IRemoteExplorerService, RemoteExplorerService>();
+            services.AddSingleton<IProgramService, ProgramService>();
 
             // TCP Client
             services.AddScoped<ITcpJsonClient, TcpJsonClient>();

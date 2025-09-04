@@ -27,6 +27,7 @@ namespace WOL.ViewModels
         public ICommand DeleteDeviceCommand { get; }
         public ICommand WakeAllDevicesCommand { get; }
         public ICommand ShutdownAllDevicesCommand { get; }
+        public ICommand CheckDeviceStatusCommand { get; }
 
         public DeviceViewModel(IDataService dataService, NewDeviceViewModel newDeviceViewModel, IDeviceService deviceService)
         {
@@ -40,6 +41,7 @@ namespace WOL.ViewModels
             DeleteDeviceCommand = new RelayCommand<Device>(async (d) => await DeleteDeviceAsync(d), (d) => d != null);
             WakeAllDevicesCommand = new RelayCommand(async () => await WakeAllDevices(), () => _currentProject != null);
             ShutdownAllDevicesCommand = new RelayCommand(async () => await ShutdownAllDevices(), () => _currentProject != null);
+            CheckDeviceStatusCommand = new RelayCommand<Device>((d) => CheckDeviceStatus(d), (d) => d != null);
         }
 
         public void LoadDevicesForProject(Project project)
@@ -111,6 +113,12 @@ namespace WOL.ViewModels
         {
             if (_currentProject == null) return;
             await Task.Run(() => _deviceService.ShutdownAllDevices(_currentProject));
+        }
+
+        private void CheckDeviceStatus(Device device)
+        {
+            if (device == null) return;
+            _deviceService.CheckDeviceStatus(device);
         }
 
         private void OnDeviceStatusChanged(Device device)

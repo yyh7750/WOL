@@ -10,7 +10,8 @@ namespace WOL.Models
     public enum DeviceStatus
     {
         Online,
-        Offline
+        Offline,
+        Checking
     }
 
     [Table("device")]

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Timers;
-using System.Windows;
 using WOL.Models;
 using WOL.Services.Interface;
 
@@ -12,16 +10,18 @@ namespace WOL.Services
     {
         private const int OFFLINE_TIMEOUT_MS = 5000;
         private readonly IWakeOnLanService _wakeOnLanService;
+        private readonly IProgramService _programService;
         private readonly Dictionary<string, DateTime> _lastHeartbeatTimes;
-        private System.Timers.Timer? _offlineCheckTimer;
+        private Timer? _offlineCheckTimer;
 
         public Project? CurrentProject { get; private set; }
 
         public event Action<Device>? DeviceStatusChanged;
 
-        public DeviceService(IWakeOnLanService wakeOnLanService)
+        public DeviceService(IWakeOnLanService wakeOnLanService, IProgramService programService)
         {
             _wakeOnLanService = wakeOnLanService;
+            _programService = programService;
             _wakeOnLanService.HeartbeatReceived += OnHeartbeatReceived;
             _lastHeartbeatTimes = [];
         }
@@ -57,6 +57,24 @@ namespace WOL.Services
             }
         }
 
+        public void CheckDeviceStatus(Device device)
+        {
+            switch (device.Status)
+            {
+                case DeviceStatus.Online:
+                    _wakeOnLanService.ShutdownAsync(device.IP);
+                    break;
+                case DeviceStatus.Offline:
+                    _wakeOnLanService.WakeUpAsync(device.MAC);
+                    break;
+                case DeviceStatus.Checking:
+                    break;
+            }
+
+            device.Status = DeviceStatus.Checking;
+            DeviceStatusChanged?.Invoke(device);
+        }
+
         private void OnHeartbeatReceived(string ip)
         {
             if (CurrentProject == null || CurrentProject.Devices == null) return;
@@ -77,16 +95,21 @@ namespace WOL.Services
         {
             if (CurrentProject == null || CurrentProject.Devices == null) return;
 
-            List<Device> devices = CurrentProject.Devices.ToList();
+            List<Device> devices = [.. CurrentProject.Devices];
 
             foreach (Device device in devices)
             {
+                // Server PC는 항상 온라인 표시
+                if (_programService.IsMyIpAddress(device.IP))
+                {
+                    device.Status = DeviceStatus.Online;
+                }
+
                 if (_lastHeartbeatTimes.TryGetValue(device.IP, out DateTime lastHeartbeatTime))
                 {
                     if (device.Status == DeviceStatus.Online && (DateTime.Now - lastHeartbeatTime).TotalMilliseconds > OFFLINE_TIMEOUT_MS)
                     {
                         device.Status = DeviceStatus.Offline;
-                        DeviceStatusChanged?.Invoke(device);
                     }
                 }
                 else
@@ -94,9 +117,10 @@ namespace WOL.Services
                     if (device.Status == DeviceStatus.Online)
                     {
                         device.Status = DeviceStatus.Offline;
-                        DeviceStatusChanged?.Invoke(device);
                     }
                 }
+
+                DeviceStatusChanged?.Invoke(device);
             }
         }
 

@@ -18,6 +18,8 @@ namespace WOL.Converters
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
                     case DeviceStatus.Offline:
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280"));
+                    case DeviceStatus.Checking:
+                        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B2B2B2"));
                 }
             }
 
@@ -29,4 +31,4 @@ namespace WOL.Converters
             throw new NotImplementedException();
         }
     }
-} 
+}

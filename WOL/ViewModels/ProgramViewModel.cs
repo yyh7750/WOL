@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Collections.Generic;
 using System;
+using Microsoft.Win32;
 
 namespace WOL.ViewModels
 {
@@ -16,6 +17,7 @@ namespace WOL.ViewModels
     {
         private readonly IDataService _dataService;
         private readonly IRemoteExplorerService _remoteExplorerService;
+        private readonly IProgramService _programService;
         private Project? _currentProject;
 
         public ObservableCollection<Program> Programs { get; } = [];
@@ -28,10 +30,11 @@ namespace WOL.ViewModels
         public ICommand StartProgramCommand { get; }
         public ICommand StopProgramCommand { get; }
 
-        public ProgramViewModel(IDataService dataService, IRemoteExplorerService remoteExplorerService)
+        public ProgramViewModel(IDataService dataService, IRemoteExplorerService remoteExplorerService, IProgramService programService)
         {
             _dataService = dataService;
             _remoteExplorerService = remoteExplorerService;
+            _programService = programService;
 
             AddProgramCommand = new RelayCommand<Device>(async (d) => await AddProgramAsync(d), (d) => d != null);
             DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p));
@@ -59,23 +62,47 @@ namespace WOL.ViewModels
         {
             if (device == null) return;
 
-            Tuple<bool?, List<EntryDto>> dialogResult = await _remoteExplorerService.ShowRemoteExplorerDialogAsync(device);
-            bool? result = dialogResult.Item1;
-            List<EntryDto> selectedFiles = dialogResult.Item2;
-
-            if (result == true && selectedFiles.Count > 0)
+            if (!_programService.IsMyIpAddress(device.IP)) // Client PC
             {
-                foreach (EntryDto f in selectedFiles)
+                Tuple<bool?, List<EntryDto>> dialogResult = await _remoteExplorerService.ShowRemoteExplorerDialogAsync(device);
+                bool? result = dialogResult.Item1;
+                List<EntryDto> selectedFiles = dialogResult.Item2;
+
+                if (result == true && selectedFiles.Count > 0)
                 {
-                    Program newProgram = new()
+                    foreach (EntryDto f in selectedFiles)
                     {
-                        Name = System.IO.Path.GetFileNameWithoutExtension(f.FullPath),
-                        Path = f.FullPath,
-                        Status = ProgramStatus.Stopped,
-                        DeviceId = device.Id
-                    };
-                    await _dataService.ProgramRepository.AddProgramAsync(newProgram);
-                    Programs.Add(newProgram);
+                        Program newProgram = new()
+                        {
+                            Name = System.IO.Path.GetFileNameWithoutExtension(f.FullPath),
+                            Path = f.FullPath,
+                            Status = ProgramStatus.Stopped,
+                            DeviceId = device.Id
+                        };
+                        
+                        await _dataService.ProgramRepository.AddProgramAsync(newProgram);
+                        Programs.Add(newProgram);
+                    }
+                }
+            }
+            else // Server(Local) PC
+            {
+                OpenFileDialog openFileDialog = new() { Multiselect = true, Filter = "All files (*.*)|*.*" };
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    foreach (string filename in openFileDialog.FileNames)
+                    {
+                        Program newProgram = new()
+                        {
+                            Name = System.IO.Path.GetFileNameWithoutExtension(filename),
+                            Path = filename,
+                            Status = ProgramStatus.Stopped,
+                            DeviceId = device.Id
+                        };
+                        
+                        await _dataService.ProgramRepository.AddProgramAsync(newProgram);
+                        Programs.Add(newProgram);
+                    }
                 }
             }
         }

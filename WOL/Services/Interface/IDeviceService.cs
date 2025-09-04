@@ -10,7 +10,8 @@ namespace WOL.Services.Interface
         void SetCurrentProject(Project project);
         void WakeAllDevices(Project project);
         void ShutdownAllDevices(Project project);
-
+        void CheckDeviceStatus(Device device);
+        
         event Action<Device>? DeviceStatusChanged;
     }
 }
