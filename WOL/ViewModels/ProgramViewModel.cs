@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using System;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace WOL.ViewModels
 {
@@ -40,7 +41,7 @@ namespace WOL.ViewModels
             DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p));
             StartAllProgramsCommand = new RelayCommand(async () => await StartAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Stopped));
             StopAllProgramsCommand = new RelayCommand(async () => await StopAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Running));
-            StartProgramCommand = new RelayCommand<Program>(async (p) => await StartProgramAsync(p));
+            StartProgramCommand = new RelayCommand<Device>(async (p) => await StartProgramAsync(p));
             StopProgramCommand = new RelayCommand<Program>(async (p) => await StopProgramAsync(p));
         }
 
@@ -114,9 +115,9 @@ namespace WOL.ViewModels
             Programs.Remove(program);
         }
 
-        private async Task StartProgramAsync(Program program)
+        private async Task StartProgramAsync(Device device)
         {
-            // TODO : 실제 프로그램 실행 로직 추가
+            await _programService.StartProgramAsync(device);
         }
 
         private async Task StopProgramAsync(Program program)
@@ -126,7 +127,6 @@ namespace WOL.ViewModels
 
         private async Task StartAllProgramsAsync()
         {
-            // TODO : 실제 프로그램 실행 로직 추가
         }
 
         private async Task StopAllProgramsAsync()

@@ -49,7 +49,7 @@
                             <Button Grid.Column="2"
                                     Margin="0,0,4,0"
                                     Command="{Binding DataContext.ProgramViewModel.StartProgramCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding}"
+                                    CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     Content="실행"
                                     Style="{StaticResource SuccessButton}" />
                             <Button Grid.Column="3"

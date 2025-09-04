@@ -103,6 +103,7 @@ namespace WOL.Services
                 if (_programService.IsMyIpAddress(device.IP))
                 {
                     device.Status = DeviceStatus.Online;
+                    break;
                 }
 
                 if (_lastHeartbeatTimes.TryGetValue(device.IP, out DateTime lastHeartbeatTime))

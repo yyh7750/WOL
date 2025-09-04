@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using WOL.Services.Interface;
 using System.Linq;
 using System.Net.Sockets;
+using WOL.Models;
 
 namespace WOL.Services
 {
@@ -15,7 +16,7 @@ namespace WOL.Services
             throw new System.NotImplementedException();
         }
 
-        public Task StartProgramAsync()
+        public Task StartProgramAsync(Device device)
         {
             // UDP 통신
             throw new System.NotImplementedException();
@@ -27,7 +28,7 @@ namespace WOL.Services
             throw new System.NotImplementedException();
         }
 
-        public Task StopProgramAsync()
+        public Task StopProgramAsync(Device device)
         {
             // UDP 통신
             throw new System.NotImplementedException();
