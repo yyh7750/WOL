@@ -19,9 +19,9 @@ namespace WOL.Models
     {
         [Key]
         private int _id;
-        private string _name = string.Empty;
-        private string _ip = string.Empty;
-        private string _mac = string.Empty;
+        private string _name;
+        private string _ip;
+        private string _mac;
         private DeviceStatus _status;
         private ObservableCollection<Program> _programs;
 

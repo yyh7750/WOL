@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Globalization;
 using System;
+using System.Diagnostics;
 
 namespace WOL.Services
 {
@@ -81,12 +82,12 @@ namespace WOL.Services
                         }
                         else
                         {
-                            Console.WriteLine("Received unknown message: " + message);
+                            Debug.WriteLine("Received unknown message: " + message);
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Received invalid heartbeat packet.");
+                        Debug.WriteLine("Received invalid heartbeat packet.");
                     }
                 }
             }

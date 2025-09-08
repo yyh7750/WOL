@@ -8,6 +8,7 @@ namespace WOLClient.Services
         public string ServerIp { get; private set; }
         public int SendPort { get; private set; }
         public int ShutdownListenPort { get; private set; }
+        public int ProgramSignalPort { get; private set; }
         public int FileSelectPort { get; private set; }
 
         private readonly string _configPath;
@@ -17,6 +18,8 @@ namespace WOLClient.Services
             ServerIp = string.Empty;
             SendPort = 0;
             FileSelectPort = 6060;
+            ShutdownListenPort = 12357;
+            ProgramSignalPort = 30020;
 
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDir = Path.GetDirectoryName(exePath) ?? ".";
@@ -32,6 +35,7 @@ namespace WOLClient.Services
             SendPort = 12359;
             ShutdownListenPort = 12357;
             FileSelectPort = 6060;
+            ProgramSignalPort = 30020;
 
             if (!File.Exists(_configPath))
             {
@@ -73,6 +77,13 @@ namespace WOLClient.Services
                             FileSelectPort = port;
                         }
                     }
+                    else if (key.Equals("PROGRAM_SIGNAL_PORT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (int.TryParse(value, out int port))
+                        {
+                            ProgramSignalPort = port;
+                        }
+                    }
                 }
             }
         }
@@ -86,6 +97,7 @@ namespace WOLClient.Services
                 writer.WriteLine("SEND_PORT = 12359");
                 writer.WriteLine("SHUTDOWN_LISTEN_PORT = 12357");
                 writer.WriteLine("FILE_SELECT_PORT = 6060");
+                writer.WriteLine("PROGRAM_SIGNAL_PORT = 30020");
             }
         }
     }

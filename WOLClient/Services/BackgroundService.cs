@@ -1,6 +1,10 @@
 using System.Net.Sockets;
 using System.Timers;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text;
+using WOLClient.Models.Dto;
+using System.IO;
 
 namespace WOLClient.Services
 {
@@ -11,10 +15,15 @@ namespace WOLClient.Services
         private const int FILE_SERVER_PORT_DEFAULT = 6060;
         private const int HEARTBEAT_INTERVAL_MS = 1000;
 
-        private UdpClient? _udpListener;
+        private UdpClient? _shutdownUdpListener;
+        private UdpClient? _programUdpListener;
         private System.Timers.Timer? _timer;
+
+        private CancellationTokenSource? _cts;
+        private Task? _shutdownTask;
+        private Task? _programTask;
+
         private TcpFileServer? _fileServer;
-        private readonly CancellationTokenSource _cts;
         private readonly IniService _iniService;
 
         public BackgroundService()
@@ -25,38 +34,79 @@ namespace WOLClient.Services
 
         public void Start()
         {
-            Task.Run(() => ListenForShutdownMessages(_cts.Token));
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            _shutdownTask = Task.Run(() => ListenForShutdownMessages(token), token);
 
             _timer = new System.Timers.Timer(HEARTBEAT_INTERVAL_MS);
             _timer.Elapsed += SendHeartbeat;
             _timer.AutoReset = true;
             _timer.Enabled = true;
 
-            // start TCP file server for remote file picking
             _fileServer = new TcpFileServer();
             int port = _iniService.FileSelectPort > 0 ? _iniService.FileSelectPort : FILE_SERVER_PORT_DEFAULT;
             _fileServer.Start(port);
+
+            _programTask = Task.Run(() => ListenForProgramSignalMessages(token), token);
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            _cts.Cancel();
-            _timer?.Stop();
-            _timer?.Dispose();
-            _udpListener?.Close();
-            _udpListener?.Dispose();
+            _cts?.Cancel();
+
+            if (_timer != null)
+            {
+                _timer.Enabled = false;
+                _timer.Dispose();
+                _timer = null;
+            }
+
+            _shutdownUdpListener?.Close();
+            _programUdpListener?.Close();
+
+            try
+            {
+                var tasks = new[] { _shutdownTask, _programTask }.Where(t => t != null)!;
+                await Task.WhenAll(tasks!);
+            }
+            catch (OperationCanceledException ex) 
+            {
+                Debug.WriteLine($"StopAsync Tasks cancelled: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"StopAsync Tasks error: {ex}");
+            }
+            finally
+            {
+                _shutdownTask = _programTask = null;
+            }
+
+            _shutdownUdpListener?.Dispose();
+            _shutdownUdpListener = null;
+
+            _programUdpListener?.Dispose();
+            _programUdpListener = null;
+
             _fileServer?.Stop();
+            _fileServer = null;
+
+            _cts?.Dispose();
+            _cts = null;
         }
 
         private async Task ListenForShutdownMessages(CancellationToken cancellationToken)
         {
-            _udpListener = new UdpClient(_iniService.ShutdownListenPort);
+            _shutdownUdpListener = new UdpClient(_iniService.ShutdownListenPort);
 
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    UdpReceiveResult result = await _udpListener.ReceiveAsync(cancellationToken);
+                    UdpReceiveResult result = await _shutdownUdpListener.ReceiveAsync(cancellationToken);
                     byte[] receivedBytes = result.Buffer;
 
                     if (receivedBytes.Length == 4)
@@ -69,17 +119,93 @@ namespace WOLClient.Services
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                // This is expected when the task is cancelled.
+                Debug.WriteLine($"ListenForShutdownMessages cancelled: {ex.Message}");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error in ListenForShutdownMessages: {ex.Message}");
             }
-            finally
+        }
+
+        private async Task ListenForProgramSignalMessages(CancellationToken cancellationToken)
+        {
+            _programUdpListener = new UdpClient(_iniService.ProgramSignalPort);
+
+            try
             {
-                _udpListener?.Close();
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    UdpReceiveResult result = await _programUdpListener.ReceiveAsync(cancellationToken);
+                    byte[] receivedBytes = result.Buffer;
+
+                    string json = Encoding.UTF8.GetString(receivedBytes);
+
+                    try
+                    {
+                        ProgramDto? dto = JsonSerializer.Deserialize<ProgramDto>(json);
+                        if (dto != null)
+                        {
+                            Debug.WriteLine($"[RECEIVED] IsStart={dto.IsStart}, Paths={string.Join(", ", dto.Paths)}");
+
+                            if (dto.IsStart)
+                            {
+                                foreach (string path in dto.Paths)
+                                {
+                                    try
+                                    {
+                                        Process.Start(new ProcessStartInfo
+                                        {
+                                            FileName = path,
+                                            UseShellExecute = true,
+                                            Verb = "runas", //   
+                                            WorkingDirectory = Path.GetDirectoryName(path)
+                                        });
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"[ERROR] Failed to start program '{path}': {ex.Message}");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (string path in dto.Paths)
+                                {
+                                    try
+                                    {
+                                        string processName = Path.GetFileNameWithoutExtension(path);
+                                        foreach (var proc in Process.GetProcessesByName(processName))
+                                        {
+                                            proc.Kill();
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"[ERROR] Failed to stop program '{path}': {ex.Message}");
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[ERROR] Deserialized ProgramDto is null.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[ERROR] {ex.Message}");
+                    }
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                Debug.WriteLine($"ListenForProgramSignalMessages cancelled: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in ListenForProgramSignalMessages: {ex.Message}");
             }
         }
 

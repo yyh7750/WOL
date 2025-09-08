@@ -10,7 +10,6 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using System;
 using Microsoft.Win32;
-using System.Diagnostics;
 
 namespace WOL.ViewModels
 {
@@ -37,12 +36,12 @@ namespace WOL.ViewModels
             _remoteExplorerService = remoteExplorerService;
             _programService = programService;
 
-            AddProgramCommand = new RelayCommand<Device>(async (d) => await AddProgramAsync(d), (d) => d != null);
-            DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p));
+            AddProgramCommand = new RelayCommand<Device>(async (d) => await AddProgramAsync(d!));
+            DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p!));
             StartAllProgramsCommand = new RelayCommand(async () => await StartAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Stopped));
             StopAllProgramsCommand = new RelayCommand(async () => await StopAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Running));
-            StartProgramCommand = new RelayCommand<Device>(async (p) => await StartProgramAsync(p));
-            StopProgramCommand = new RelayCommand<Program>(async (p) => await StopProgramAsync(p));
+            StartProgramCommand = new RelayCommand<Device>(d => StartProgramAsync(d!));
+            StopProgramCommand = new RelayCommand<Device>(d => StopProgramAsync(d!));
         }
 
         public void LoadProgramsForProject(Project project)
@@ -115,23 +114,24 @@ namespace WOL.ViewModels
             Programs.Remove(program);
         }
 
-        private async Task StartProgramAsync(Device device)
+        private void StartProgramAsync(Device device)
         {
-            await _programService.StartProgramAsync(device);
+            _programService.StartProgramAsync(device);
         }
 
-        private async Task StopProgramAsync(Program program)
+        private void StopProgramAsync(Device device)
         {
-            // TODO : 실제 프로그램 중지 로직 추가
+            _programService.StopProgramAsync(device);
         }
 
         private async Task StartAllProgramsAsync()
         {
+            await _programService.StartAllProgramsAsync();
         }
 
         private async Task StopAllProgramsAsync()
         {
-            // TODO : 실제 프로그램 중지 로직 추가
+            await _programService.StopAllProgramsAsync();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

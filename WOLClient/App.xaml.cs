@@ -7,21 +7,22 @@ namespace WOLClient
 {
     public partial class App : System.Windows.Application
     {
-        private NotifyIcon _notifyIcon;
-        private BackgroundService _backgroundService;
+        private NotifyIcon? _notifyIcon;
+        private BackgroundService? _backgroundService;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            // Initialize NotifyIcon
-            _notifyIcon = new NotifyIcon();
-            _notifyIcon.Icon = SystemIcons.Information;
-            _notifyIcon.Text = "WOLClient is running";
-            _notifyIcon.Visible = true;
-            _notifyIcon.DoubleClick += NotifyIconDoubleClick;
+            _notifyIcon = new()
+            {
+                Icon = SystemIcons.Information,
+                Text = "WOLClient is running",
+                Visible = true
+            };
+            _notifyIcon.DoubleClick += NotifyIconDoubleClick!;
 
-            _notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+            _notifyIcon.ContextMenuStrip = new();
             _notifyIcon.ContextMenuStrip.Items.Add("Exit", null, OnExitClicked);
 
             _backgroundService = new BackgroundService();
@@ -30,7 +31,7 @@ namespace WOLClient
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
         }
 
-        private void NotifyIconDoubleClick(object sender, EventArgs e)
+        private void NotifyIconDoubleClick(object? sender, EventArgs e)
         {
             System.Windows.MessageBox.Show("WOLClient is running in the background.", "WOLClient Status", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -42,7 +43,7 @@ namespace WOLClient
 
         protected override void OnExit(ExitEventArgs e)
         {
-            _backgroundService?.Stop();
+            _backgroundService?.StopAsync();
             _notifyIcon?.Dispose();
             base.OnExit(e);
         }

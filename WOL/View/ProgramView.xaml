@@ -55,7 +55,7 @@
                             <Button Grid.Column="3"
                                     Margin="0,0,4,0"
                                     Command="{Binding DataContext.ProgramViewModel.StopProgramCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding}"
+                                    CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     Content="중지"
                                     Style="{StaticResource WarningButton}" />
                             <Button Grid.Column="4"
