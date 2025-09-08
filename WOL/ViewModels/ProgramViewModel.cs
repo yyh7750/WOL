@@ -38,10 +38,10 @@ namespace WOL.ViewModels
 
             AddProgramCommand = new RelayCommand<Device>(async (d) => await AddProgramAsync(d!));
             DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p!));
-            StartAllProgramsCommand = new RelayCommand(async () => await StartAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Stopped));
-            StopAllProgramsCommand = new RelayCommand(async () => await StopAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Running));
-            StartProgramCommand = new RelayCommand<Device>(d => StartProgramAsync(d!));
-            StopProgramCommand = new RelayCommand<Device>(d => StopProgramAsync(d!));
+            StartAllProgramsCommand = new RelayCommand(() => StartAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Stopped));
+            StopAllProgramsCommand = new RelayCommand(() => StopAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Running));
+            StartProgramCommand = new RelayCommand<object>(p => StartProgramAsync(p!));
+            StopProgramCommand = new RelayCommand<object>(p => StopProgramAsync(p!));
         }
 
         public void LoadProgramsForProject(Project project)
@@ -114,24 +114,46 @@ namespace WOL.ViewModels
             Programs.Remove(program);
         }
 
-        private void StartProgramAsync(Device device)
+        private void StartProgramAsync(object parameter)
         {
-            _programService.StartProgramAsync(device);
+            if (parameter is object[] values && values.Length == 2)
+            {
+                if (values[0] is Device device && values[1] is Program program)
+                {
+                    _programService.StartProgramAsync(device, program);
+                }
+            }
         }
 
-        private void StopProgramAsync(Device device)
+        private void StopProgramAsync(object parameter)
         {
-            _programService.StopProgramAsync(device);
+            if (parameter is object[] values && values.Length == 2)
+            {
+                if (values[0] is Device device && values[1] is Program program)
+                {
+                    _programService.StopProgramAsync(device, program);
+                }
+            }
         }
 
-        private async Task StartAllProgramsAsync()
+        private void StartAllProgramsAsync()
         {
-            await _programService.StartAllProgramsAsync();
+            if (_currentProject == null) throw new Exception("Current Project is Null");
+
+            foreach (Device device in _currentProject.Devices)
+            {
+                
+            }
         }
 
-        private async Task StopAllProgramsAsync()
+        private void StopAllProgramsAsync()
         {
-            await _programService.StopAllProgramsAsync();
+            if (_currentProject == null) throw new Exception("Current Project is Null");
+            
+            foreach (Device device in _currentProject.Devices)
+            {
+                
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

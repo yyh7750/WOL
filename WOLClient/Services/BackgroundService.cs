@@ -72,7 +72,7 @@ namespace WOLClient.Services
                 var tasks = new[] { _shutdownTask, _programTask }.Where(t => t != null)!;
                 await Task.WhenAll(tasks!);
             }
-            catch (OperationCanceledException ex) 
+            catch (OperationCanceledException ex)
             {
                 Debug.WriteLine($"StopAsync Tasks cancelled: {ex.Message}");
             }
@@ -147,45 +147,40 @@ namespace WOLClient.Services
                         ProgramDto? dto = JsonSerializer.Deserialize<ProgramDto>(json);
                         if (dto != null)
                         {
-                            Debug.WriteLine($"[RECEIVED] IsStart={dto.IsStart}, Paths={string.Join(", ", dto.Paths)}");
+                            Debug.WriteLine($"[RECEIVED] IsStart={dto.IsStart}, Paths={string.Join(", ", dto.Path)}");
 
                             if (dto.IsStart)
                             {
-                                foreach (string path in dto.Paths)
+                                try
                                 {
-                                    try
+                                    Process.Start(new ProcessStartInfo
                                     {
-                                        Process.Start(new ProcessStartInfo
-                                        {
-                                            FileName = path,
-                                            UseShellExecute = true,
-                                            Verb = "runas", //   
-                                            WorkingDirectory = Path.GetDirectoryName(path)
-                                        });
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine($"[ERROR] Failed to start program '{path}': {ex.Message}");
-                                    }
+                                        FileName = dto.Path,
+                                        UseShellExecute = true,
+                                        Verb = "runas", //   
+                                        WorkingDirectory = Path.GetDirectoryName(dto.Path)
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"[ERROR] Failed to start program '{dto.Path}': {ex.Message}");
                                 }
                             }
                             else
                             {
-                                foreach (string path in dto.Paths)
+                                try
                                 {
-                                    try
+                                    string processName = Path.GetFileNameWithoutExtension(dto.Path);
+                                    foreach (var proc in Process.GetProcessesByName(processName))
                                     {
-                                        string processName = Path.GetFileNameWithoutExtension(path);
-                                        foreach (var proc in Process.GetProcessesByName(processName))
-                                        {
-                                            proc.Kill();
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine($"[ERROR] Failed to stop program '{path}': {ex.Message}");
+                                        proc.Kill();
                                     }
                                 }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"[ERROR] Failed to stop program '{dto.Path}': {ex.Message}");
+                                }
+
                             }
                         }
                         else

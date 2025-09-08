@@ -5,11 +5,9 @@ namespace WOL.Services.Interface
 {
     public interface IProgramService
     {
-        void StartProgramAsync(Device device);
-        void StopProgramAsync(Device device);
-        Task StartAllProgramsAsync();
-        Task StopAllProgramsAsync();
+        void StartProgramAsync(Device device, Program program);
+        void StopProgramAsync(Device device, Program program);
         bool IsMyIpAddress(string ip);
-        Task SendProgramSignalAsync(Device device, bool isStart);
+        Task SendProgramSignalAsync(Device device, Program program, bool isStart);
     }
 }

@@ -4,14 +4,14 @@ namespace WOL.Models.Dto
 {
     public class ProgramDto
     {
-        public List<string> Paths { get; set; }
+        public string Path { get; set; }
         public bool IsStart{ get; set; }
 
-        public ProgramDto() : this([], false) { }
+        public ProgramDto() : this(string.Empty, false) { }
 
-        public ProgramDto(List<string> paths, bool isStart)
+        public ProgramDto(string path, bool isStart)
         {
-            Paths = paths;
+            Path = path;
             IsStart = isStart;
         }
     }

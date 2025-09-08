@@ -3,12 +3,12 @@ namespace WOLClient.Models.Dto
 {
     public class ProgramDto
     {
-        public List<string> Paths { get; set; }
+        public string Path { get; set; }
         public bool IsStart { get; set; }
 
         public ProgramDto()
         {
-            Paths = [];
+            Path = string.Empty;
             IsStart = false;
         }
     }

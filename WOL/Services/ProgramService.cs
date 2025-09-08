@@ -20,26 +20,14 @@ namespace WOL.Services
             _iniService = iniService;
         }
 
-        public Task StartAllProgramsAsync()
+        public void StartProgramAsync(Device device, Program program)
         {
-            // view model에서 프로그램 리스트 받아온 다음 프로그램 별로 StartProgramAsync 호출
-            throw new System.NotImplementedException();
+            SendProgramSignalAsync(device, program, true).Wait();
         }
 
-        public void StartProgramAsync(Device device)
+        public void StopProgramAsync(Device device, Program program)
         {
-            SendProgramSignalAsync(device, true).Wait();
-        }
-
-        public Task StopAllProgramsAsync()
-        {
-            // view model에서 프로그램 리스트 받아온 다음 프로그램 별로 StopProgramAsync 호출
-            throw new NotImplementedException();
-        }
-
-        public void StopProgramAsync(Device device)
-        {
-            SendProgramSignalAsync(device, false).Wait();
+            SendProgramSignalAsync(device, program, false).Wait();
         }
 
         public bool IsMyIpAddress(string ip)
@@ -59,16 +47,32 @@ namespace WOL.Services
             return myAddresses.Any(myIp => myIp.Equals(inputIp));
         }
 
-        public async Task SendProgramSignalAsync(Device device, bool isStart)
+        public async Task SendProgramSignalAsync(Device device, Program program, bool isStart)
         {
             ArgumentNullException.ThrowIfNull(device);
+            ArgumentNullException.ThrowIfNull(program);
             if (_iniService == null) throw new InvalidOperationException("IIniService is not initialized.");
 
             _udpService ??= new UdpService(device.IP, _iniService.ProgramSignalPort);
 
+            string? runProgramPath = null;
+            foreach (Program p in device.Programs)
+            {
+                if (p.Path == program.Path)
+                {
+                    runProgramPath = p.Path;
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(runProgramPath))
+            {
+                throw new ArgumentException("The specified program does not belong to the given device.");
+            }
+
             ProgramDto sendData = new()
             {
-                Paths = device.Programs.Select(p => p.Path).ToList(),
+                Path = runProgramPath,
                 IsStart = isStart
             };
 

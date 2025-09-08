@@ -17,6 +17,7 @@
             <converters:StatusColorConverter x:Key="StatusColorConverter" />
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
+            <converters:MultiValueConverter x:Key="MultiValueConverter" />
 
         </ResourceDictionary>
     </Application.Resources>
