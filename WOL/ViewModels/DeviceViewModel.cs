@@ -123,8 +123,8 @@ namespace WOL.ViewModels
 
         private void OnDeviceStatusChanged(Device device)
         {
-            // Device.Status가 INotifyPropertyChanged를 구현하므로 UI는 자동으로 업데이트됩니다.
-            // 따라서 이 이벤트 핸들러에서 별도의 UI 갱신 로직은 필요 없습니다.
+            // Device.Status가 INotifyPropertyChanged를 구현하므로 UI는 자동으로 업데이트 됨.
+            // 따라서 이 이벤트 핸들러에서 별도의 UI 갱신 로직은 필요 없음.
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -105,10 +105,10 @@ namespace WOL.Services
                 if (_programService.IsMyIpAddress(device.IP))
                 {
                     Application.Current.Dispatcher.Invoke(() => device.Status = DeviceStatus.Online);
-                    continue; // 서버 PC는 다음 로직을 건너뜁니다.
+                    continue;
                 }
 
-                // 마지막 하트비트 시간이 임계값을 초과하면 오프라인으로 간주합니다.
+                // 마지막 하트비트 시간이 임계값을 초과하면 오프라인으로 간주
                 if (device.Status == DeviceStatus.Online && (DateTime.UtcNow - device.LastHeartbeat).TotalMilliseconds > OFFLINE_TIMEOUT_MS)
                 {
                     Application.Current.Dispatcher.Invoke(() => device.Status = DeviceStatus.Offline);
@@ -132,14 +132,11 @@ namespace WOL.Services
             {
                 foreach (Device device in project.Devices)
                 {
-                    // 프로젝트가 변경되면 모든 장치의 마지막 하트비트 시간을 초기화합니다.
-                    // 이렇게 하면 하트비트를 받기 전까지는 오프라인으로 표시됩니다.
                     device.LastHeartbeat = DateTime.MinValue;
                     device.Status = DeviceStatus.Offline;
                 }
             }
 
-            // 타이머를 새로 시작합니다.
             _offlineCheckTimer = new System.Timers.Timer(1000);
             _offlineCheckTimer.Elapsed += CheckDeviceOfflineStatus;
             _offlineCheckTimer.AutoReset = true;

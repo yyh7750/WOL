@@ -89,7 +89,7 @@ namespace WOL.Services
                     Debug.WriteLine($"Error in MonitorPrograms: {ex.Message}");
                 }
 
-                await Task.Delay(1000, token); // 1�ʸ��� �˻�
+                await Task.Delay(1000, token);
             }
         }
 

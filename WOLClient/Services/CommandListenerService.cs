@@ -144,7 +144,7 @@ namespace WOLClient.Services
             string[]? namePrefixes = null,
             int? takeTop = null)
         {
-            var list = new List<(ProcessDto dto, bool hasWindow, long ws, string pathKey)>();
+            List<(ProcessDto dto, bool hasWindow, long ws, string? pathKey)> list = [];
 
             int currentSession = Process.GetCurrentProcess().SessionId;
 
@@ -190,7 +190,7 @@ namespace WOLClient.Services
                 finally { p.Dispose(); }
             }
 
-            IEnumerable<(ProcessDto dto, bool hasWindow, long ws, string key)> query = list;
+            IEnumerable<(ProcessDto dto, bool hasWindow, long ws, string? key)> query = list;
 
             if (uniqueByPath)
             {
