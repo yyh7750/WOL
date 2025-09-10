@@ -179,11 +179,11 @@ namespace WOLClient.Services
                     if (uniqueByPath)
                     {
                         string key = string.IsNullOrEmpty(path) ? $"__NO_PATH__::{p.ProcessName}" : path;
-                        list.Add((new ProcessDto { Name = p.ProcessName, FilePath = path }, hasWindow, p.WorkingSet64, key));
+                        list.Add((new ProcessDto { Name = p.ProcessName, FilePath = path! }, hasWindow, p.WorkingSet64, key));
                     }
                     else
                     {
-                        list.Add((new ProcessDto { Name = p.ProcessName, FilePath = path }, hasWindow, p.WorkingSet64, null));
+                        list.Add((new ProcessDto { Name = p.ProcessName, FilePath = path! }, hasWindow, p.WorkingSet64, null));
                     }
                 }
                 catch { /* skip */ }
