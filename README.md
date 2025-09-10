@@ -1,66 +1,75 @@
-# WOL (Wake On LAN) 애플리케이션
+# WOL - Remote PC & Process Manager
 
-WOL 애플리케이션은 Wake-on-LAN(WOL) 기능을 통해 네트워크 장치를 관리하고 제어하기 위한 Windows Presentation Foundation (WPF) 기반의 데스크톱 애플리케이션입니다. 이 애플리케이션을 통해 사용자는 장치를 추가, 수정, 삭제하고, 프로젝트별로 장치를 그룹화하며, 장치의 온라인/오프라인 상태를 모니터링하고, 원격으로 장치를 켜거나 끌 수 있습니다.
+**WOL (Wake On LAN) & Remote Process Manager**는 원격지에 있는 PC의 전원을 관리하고, 특정 프로그램들을 원격으로 실행 및 종료하며, 상태를 실시간으로 모니터링하기 위한 Windows 데스크톱 애플리케이션입니다.
 
-## 주요 기능
+사용자는 프로젝트 단위로 여러 대의 PC를 그룹화하여 관리할 수 있으며, 직관적인 UI를 통해 모든 PC와 프로그램의 상태를 한눈에 파악하고 제어할 수 있습니다.
 
-*   **장치 관리:** IP 주소, MAC 주소 등 장치 정보를 추가, 수정, 삭제할 수 있습니다.
-*   **프로젝트 관리:** 여러 장치를 프로젝트 단위로 그룹화하여 효율적으로 관리할 수 있습니다.
-*   **Wake-on-LAN (WOL):** 등록된 장치에 WOL 패킷을 전송하여 원격으로 장치를 켤 수 있습니다.
-*   **장치 상태 모니터링:** 하트비트(Heartbeat) 신호를 통해 장치의 온라인/오프라인 상태를 실시간으로 모니터링합니다. (하트비트 송신 간격 + 5초 동안 신호가 없으면 오프라인으로 간주)
-*   **원격 종료:** 등록된 장치에 종료 명령을 전송하여 원격으로 장치를 끌 수 있습니다.
-*   **설정 관리:** INI 파일을 통해 포트 설정 등 애플리케이션 관련 설정을 관리합니다.
+## ✨ 주요 기능
 
-## 기술 스택
+- **🖥️ 원격 PC 전원 관리**
+  - **Wake On LAN**: WOL(매직 패킷)을 전송하여 원격으로 PC를 켭니다.
+  - **원격 종료/재부팅**: 원격 PC에 명령을 보내 시스템을 종료하거나 재부팅합니다.
 
-*   **프론트엔드:** C#, WPF (.NET)
-*   **아키텍처:** MVVM (Model-View-ViewModel) 패턴
-*   **데이터베이스:** MySQL (Entity Framework Core를 통한 데이터 접근)
-*   **네트워킹:** UDP (Wake-on-LAN 및 하트비트 통신)
+- **🗂️ 프로젝트 기반 관리**
+  - 여러 개의 PC(디바이스)를 프로젝트 단위로 그룹화하여 체계적으로 관리할 수 있습니다.
 
-## 프로젝트 구조
+- **🛰️ 실시간 상태 모니터링**
+  - **PC 상태**: 각 PC로부터 주기적인 하트비트(Heartbeat) 신호를 받아 온라인/오프라인 상태를 실시간으로 표시합니다.
+  - **프로그램 상태**: 원격 PC에서 실행 중인 프로세스를 확인하여 등록된 프로그램의 실행/중지 상태를 실시간으로 표시합니다.
 
-```
-WOL/
-├───App.xaml
-├───App.xaml.cs             # 애플리케이션 시작/종료 로직 및 의존성 주입 설정
-├───MainWindow.xaml
-├───MainWindow.xaml.cs
-├───README.md               # 이 파일
-├───WOL.csproj
-├───Commands/               # UI 명령 구현 (RelayCommand)
-├───Converters/             # 데이터 바인딩을 위한 값 변환기
-├───Data/                   # 데이터베이스 관련 로직 (DbContext, Repository 패턴)
-│   ├───AppDbContext.cs     # Entity Framework Core DbContext
-│   └───Repositories/       # 데이터 접근 리포지토리 (DeviceRepository, ProjectRepository 등)
-├───Models/                 # 애플리케이션 데이터 모델 (Device, Program, Project)
-├───Services/               # 비즈니스 로직 및 외부 서비스 연동 (WakeOnLanService, DeviceService 등)
-│   ├───DeviceService.cs    # 장치 상태 관리 및 오프라인 감지 로직
-│   └───WakeOnLanService.cs # WOL 패킷 전송 및 하트비트 수신 처리
-├───Styles/                 # WPF UI 스타일 및 템플릿
-├───View/                   # WPF 사용자 인터페이스 (XAML 파일)
-└───ViewModels/             # View와 Data를 연결하는 ViewModel (MainViewModel, DeviceViewModel 등)
-WOLClient/              # (별도 프로젝트) 장치에서 실행되는 하트비트 송신 클라이언트
-```
+- **⚙️ 원격 프로그램 제어**
+  - **원격 실행**: 원격 PC에 설치된 특정 프로그램을 원격으로 실행합니다.
+  - **원격 종료**: 원격으로 실행한 프로그램을 강제 종료합니다.
 
-## 시작하기
+## 🛠️ 기술 스택 및 아키텍처
+
+이 프로젝트는 서버(관리용)와 클라이언트(원격 PC용)로 구성된 클라이언트-서버 아키텍처를 따릅니다.
+
+- **WOL (Server)**: 관리자용 메인 애플리케이션
+  - **플랫폼**: C# WPF (.NET)
+  - **아키텍처**: MVVM (Model-View-ViewModel)
+  - **데이터베이스**: MySQL (ORM: Entity Framework Core)
+  - **DI 컨테이너**: `Microsoft.Extensions.DependencyInjection`
+
+- **WOLClient (Client)**: 원격 PC에서 실행되는 에이전트
+  - **플랫폼**: C# (.NET)
+  - **역할**: 
+    - 주기적으로 서버에 하트비트(상태) 신호를 보냅니다.
+    - 서버로부터 프로그램 실행/종료, 시스템 종료/재부팅 등의 명령을 수신하여 수행합니다.
+    - 실행 중인 프로세스 목록을 서버에 제공합니다.
+
+- **네트워킹**
+  - **UDP**: WOL 매직 패킷, 하트비트, 프로그램 실행/종료 신호 전송
+  - **TCP**: 실행 중인 프로세스 목록 조회 등 신뢰성 있는 데이터 통신
+
+## 🚀 시작하기
 
 ### 1. 데이터베이스 설정
 
-*   MySQL 서버를 설치하고 `wol` 데이터베이스를 생성합니다.
-*   `App.xaml.cs` 파일에서 `connectionString`을 사용자 환경에 맞게 수정합니다.
-    ```csharp
-    var connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
-    ```
+- 로컬 또는 원격 서버에 **MySQL**을 설치하고, `wol`이라는 이름의 데이터베이스 스키마를 생성합니다.
+- `WOL/App.xaml.cs` 파일의 `ConfigureServices` 메서드에 있는 `connectionString`을 자신의 MySQL 환경에 맞게 수정합니다.
+  ```csharp
+  private static void ConfigureServices(IServiceCollection services)
+  {
+      string connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
+      // ...
+  }
+  ```
 
-### 2. WOLClient 설정
+### 2. 클라이언트(WOLClient) 배포
 
-*   `WOLClient` 프로젝트는 모니터링 대상 장치에서 실행되어야 합니다.
-*   `WOLClient/Services/IniService.cs` 또는 관련 설정 파일을 통해 서버 IP 주소와 포트 설정을 확인합니다.
-    *   `HEARTBEAT_INTERVAL_MS` (기본 1000ms = 1초)는 하트비트 송신 간격을 나타냅니다.
+- `WOLClient` 프로젝트를 빌드하여 생성된 `WOLClient.exe` 파일을 **관리하고자 하는 모든 원격 PC**에 복사합니다.
+- 각 원격 PC에서 `WOLClient.exe`를 실행합니다. (백그라운드에서 실행되며 별도의 UI는 없습니다.)
+  - *팁: 원격 PC가 시작될 때마다 자동으로 실행되도록 작업 스케줄러에 등록하면 편리합니다.*
 
-### 3. 애플리케이션 실행
+### 3. 서버(WOL) 실행
 
-*   Visual Studio에서 `WOL.sln` 솔루션을 엽니다.
-*   솔루션을 빌드합니다.
-*   `WOL` 프로젝트를 시작 프로젝트로 설정하고 실행합니다.
+- Visual Studio에서 `WOL.sln` 솔루션을 열고 `WOL` 프로젝트를 시작 프로젝트로 설정한 후 실행합니다.
+
+## 📖 사용 방법
+
+1. **프로젝트 생성**: 좌측 하단의 `프로젝트 생성` 버튼을 클릭하여 새로운 프로젝트를 만듭니다.
+2. **디바이스 추가**: 생성된 프로젝트를 선택한 후, `디바이스 추가` 버튼을 클릭하여 원격 PC의 정보(이름, IP, MAC 주소)를 등록합니다.
+3. **프로그램 추가**: 디바이스를 선택한 후, `프로그램 추가` 버튼을 클릭하여 원격으로 제어할 프로그램을 등록합니다.
+   - **경로**: 프로그램 경로는 **원격 PC 기준의 절대 경로**여야 합니다. (예: `C:\Program Files\...\program.exe`)
+4. **제어 및 모니터링**: 등록된 PC와 프로그램을 클릭하여 전원을 켜거나 끄고, 프로그램을 실행하거나 종료하며 상태를 실시간으로 확인합니다.
