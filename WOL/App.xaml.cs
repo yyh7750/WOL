@@ -27,6 +27,14 @@ namespace WOL
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // 데이터베이스가 생성되었는지 확인
+            using (var scope = ServiceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.EnsureCreated();
+            }
+
             MainWindow mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 

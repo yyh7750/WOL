@@ -1,3 +1,5 @@
+using System;
+using System.Windows;
 using WOL.Commands;
 using WOL.Models;
 using WOL.Services.Interface;
@@ -64,14 +66,22 @@ namespace WOL.ViewModels
 
         private async Task LoadDataAsync()
         {
-            List<Project> projects = await _dataService.ProjectRepository.GetAllProjectsAsync();
-            Projects.Clear();
-            foreach (Project project in projects)
+            try
             {
-                Projects.Add(project);
+                List<Project> projects = await _dataService.ProjectRepository.GetAllProjectsAsync();
+                Projects.Clear();
+                foreach (Project project in projects)
+                {
+                    Projects.Add(project);
+                }
+                SelectedProject = Projects.FirstOrDefault();
             }
-            SelectedProject = Projects.FirstOrDefault();
+            catch (Exception ex)
+            {
+                MessageBox.Show($"데이터베이스 로딩 중 오류가 발생했습니다. DB 서버가 실행 중인지 확인해주세요.\n\n오류: {ex.Message}", "DB 연결 오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
 
         private void SelectProject(Project? project) => SelectedProject = project;
 
