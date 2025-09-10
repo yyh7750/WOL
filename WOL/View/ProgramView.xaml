@@ -38,7 +38,7 @@
                             <Border Grid.Column="1"
                                     Margin="0,0,8,0"
                                     Padding="6,2"
-                                    Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                    Background="{Binding Status, Converter={StaticResource ProgramStatusColorConverter}}"
                                     CornerRadius="8">
                                 <TextBlock FontSize="10"
                                            FontWeight="Medium"

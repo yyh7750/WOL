@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
 namespace WOL.Models
 {
@@ -23,6 +24,7 @@ namespace WOL.Models
         private string _ip;
         private string _mac;
         private DeviceStatus _status;
+        private DateTime _lastHeartbeat;
         private ObservableCollection<Program> _programs;
 
         public Device()
@@ -67,6 +69,13 @@ namespace WOL.Models
         {
             get => _status;
             set => SetProperty(ref _status, value);
+        }
+
+        [NotMapped]
+        public DateTime LastHeartbeat
+        {
+            get => _lastHeartbeat;
+            set => SetProperty(ref _lastHeartbeat, value);
         }
 
         public ObservableCollection<Program> Programs

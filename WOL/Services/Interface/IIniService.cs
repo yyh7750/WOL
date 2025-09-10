@@ -6,6 +6,7 @@ namespace WOL.Services.Interface
         int ShutdownSendPort { get; }
         int ProgramSignalPort { get; }
         int FileSelectPort { get; }
+        int CommandListenPort { get; }
         void LoadConfig();
         void CreateDefaultConfig();
     }

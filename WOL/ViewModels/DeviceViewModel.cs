@@ -123,17 +123,8 @@ namespace WOL.ViewModels
 
         private void OnDeviceStatusChanged(Device device)
         {
-            if (_currentProject == null || device.ProjectId != _currentProject.Id) return;
-
-            if (_currentProject.Devices.Contains(device))
-            {
-                _currentProject.Devices[_currentProject.Devices.IndexOf(device)] = device;
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    LoadDevicesForProject(_currentProject);
-                });
-            }
+            // Device.Status가 INotifyPropertyChanged를 구현하므로 UI는 자동으로 업데이트됩니다.
+            // 따라서 이 이벤트 핸들러에서 별도의 UI 갱신 로직은 필요 없습니다.
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

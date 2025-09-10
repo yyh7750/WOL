@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Timers;
+using System.Windows;
 using WOL.Models;
 using WOL.Services.Interface;
 
@@ -11,7 +12,6 @@ namespace WOL.Services
         private const int OFFLINE_TIMEOUT_MS = 5000;
         private readonly IWakeOnLanService _wakeOnLanService;
         private readonly IProgramService _programService;
-        private readonly Dictionary<string, DateTime> _lastHeartbeatTimes;
         private Timer? _offlineCheckTimer;
 
         public Project? CurrentProject { get; private set; }
@@ -23,7 +23,6 @@ namespace WOL.Services
             _wakeOnLanService = wakeOnLanService;
             _programService = programService;
             _wakeOnLanService.HeartbeatReceived += OnHeartbeatReceived;
-            _lastHeartbeatTimes = [];
         }
 
         ~DeviceService()
@@ -83,8 +82,11 @@ namespace WOL.Services
             {
                 if (device.IP == ip)
                 {
-                    device.Status = DeviceStatus.Online;
-                    _lastHeartbeatTimes[device.IP] = DateTime.Now;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        device.Status = DeviceStatus.Online;
+                        device.LastHeartbeat = DateTime.UtcNow;
+                    });
                     DeviceStatusChanged?.Invoke(device);
                     break;
                 }
@@ -102,53 +104,46 @@ namespace WOL.Services
                 // Server PC는 항상 온라인 표시
                 if (_programService.IsMyIpAddress(device.IP))
                 {
-                    device.Status = DeviceStatus.Online;
-                    break;
+                    Application.Current.Dispatcher.Invoke(() => device.Status = DeviceStatus.Online);
+                    continue; // 서버 PC는 다음 로직을 건너뜁니다.
                 }
 
-                if (_lastHeartbeatTimes.TryGetValue(device.IP, out DateTime lastHeartbeatTime))
+                // 마지막 하트비트 시간이 임계값을 초과하면 오프라인으로 간주합니다.
+                if (device.Status == DeviceStatus.Online && (DateTime.UtcNow - device.LastHeartbeat).TotalMilliseconds > OFFLINE_TIMEOUT_MS)
                 {
-                    if (device.Status == DeviceStatus.Online && (DateTime.Now - lastHeartbeatTime).TotalMilliseconds > OFFLINE_TIMEOUT_MS)
-                    {
-                        device.Status = DeviceStatus.Offline;
-                    }
+                    Application.Current.Dispatcher.Invoke(() => device.Status = DeviceStatus.Offline);
+                    DeviceStatusChanged?.Invoke(device);
                 }
-                else
-                {
-                    if (device.Status == DeviceStatus.Online)
-                    {
-                        device.Status = DeviceStatus.Offline;
-                    }
-                }
-
-                DeviceStatusChanged?.Invoke(device);
             }
         }
 
         public void SetCurrentProject(Project project)
         {
             CurrentProject = project;
-            _lastHeartbeatTimes.Clear();
+
             if (_offlineCheckTimer != null)
             {
                 _offlineCheckTimer.Stop();
                 _offlineCheckTimer.Dispose();
                 _offlineCheckTimer = null;
             }
+
             if (project?.Devices != null)
             {
                 foreach (Device device in project.Devices)
                 {
-                    _lastHeartbeatTimes[device.IP] = DateTime.Now;
+                    // 프로젝트가 변경되면 모든 장치의 마지막 하트비트 시간을 초기화합니다.
+                    // 이렇게 하면 하트비트를 받기 전까지는 오프라인으로 표시됩니다.
+                    device.LastHeartbeat = DateTime.MinValue;
+                    device.Status = DeviceStatus.Offline;
                 }
             }
-            if (_offlineCheckTimer == null)
-            {
-                _offlineCheckTimer = new System.Timers.Timer(1000);
-                _offlineCheckTimer.Elapsed += CheckDeviceOfflineStatus;
-                _offlineCheckTimer.AutoReset = true;
-                _offlineCheckTimer.Start();
-            }
+
+            // 타이머를 새로 시작합니다.
+            _offlineCheckTimer = new System.Timers.Timer(1000);
+            _offlineCheckTimer.Elapsed += CheckDeviceOfflineStatus;
+            _offlineCheckTimer.AutoReset = true;
+            _offlineCheckTimer.Start();
         }
     }
 }

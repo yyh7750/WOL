@@ -67,6 +67,7 @@ namespace WOL
             services.AddSingleton<IIniService, IniService>();
             services.AddSingleton<IRemoteExplorerService, RemoteExplorerService>();
             services.AddSingleton<IProgramService, ProgramService>();
+            services.AddSingleton<IProgramStatusService, ProgramStatusService>();
             services.AddSingleton<IUdpService, UdpService>();
 
             // TCP Client

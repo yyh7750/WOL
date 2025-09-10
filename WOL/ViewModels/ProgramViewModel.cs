@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using System;
 using Microsoft.Win32;
+using System.Windows;
 
 namespace WOL.ViewModels
 {
@@ -18,6 +19,7 @@ namespace WOL.ViewModels
         private readonly IDataService _dataService;
         private readonly IRemoteExplorerService _remoteExplorerService;
         private readonly IProgramService _programService;
+        private readonly IProgramStatusService _programStatusService;
         private Project? _currentProject;
 
         public ObservableCollection<Program> Programs { get; } = [];
@@ -30,16 +32,18 @@ namespace WOL.ViewModels
         public ICommand StartProgramCommand { get; }
         public ICommand StopProgramCommand { get; }
 
-        public ProgramViewModel(IDataService dataService, IRemoteExplorerService remoteExplorerService, IProgramService programService)
+        public ProgramViewModel(IDataService dataService, IRemoteExplorerService remoteExplorerService, IProgramService programService, IProgramStatusService programStatusService)
         {
             _dataService = dataService;
             _remoteExplorerService = remoteExplorerService;
             _programService = programService;
+            _programStatusService = programStatusService;
+            _programStatusService.ProgramStatusChanged += OnProgramStatusChanged;
 
             AddProgramCommand = new RelayCommand<Device>(async (d) => await AddProgramAsync(d!));
             DeleteProgramCommand = new RelayCommand<Program>(async (p) => await DeleteProgramAsync(p!));
-            StartAllProgramsCommand = new RelayCommand(() => StartAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Stopped));
-            StopAllProgramsCommand = new RelayCommand(() => StopAllProgramsAsync(), () => Programs.Any(p => p.Status == ProgramStatus.Running));
+            StartAllProgramsCommand = new RelayCommand(() => StartAllProgramsAsync());
+            StopAllProgramsCommand = new RelayCommand(() => StopAllProgramsAsync());
             StartProgramCommand = new RelayCommand<object>(p => StartProgramAsync(p!));
             StopProgramCommand = new RelayCommand<object>(p => StopProgramAsync(p!));
         }
@@ -138,21 +142,42 @@ namespace WOL.ViewModels
 
         private void StartAllProgramsAsync()
         {
-            if (_currentProject == null) throw new Exception("Current Project is Null");
+            if (_currentProject == null) return;
 
             foreach (Device device in _currentProject.Devices)
             {
-                
+                foreach (Program program in device.Programs)
+                {
+                    if (program.Status == ProgramStatus.Stopped)
+                    {
+                        _programService.StartProgramAsync(device, program);
+                    }
+                }
             }
         }
 
         private void StopAllProgramsAsync()
         {
-            if (_currentProject == null) throw new Exception("Current Project is Null");
+            if (_currentProject == null) return;
             
             foreach (Device device in _currentProject.Devices)
             {
-                
+                foreach (Program program in device.Programs)
+                {
+                    if (program.Status == ProgramStatus.Running)
+                    {
+                        _programService.StopProgramAsync(device, program);
+                    }
+                }
+            }
+        }
+
+        private void OnProgramStatusChanged(int programId, ProgramStatus newStatus)
+        {
+            var program = Programs.FirstOrDefault(p => p.Id == programId);
+            if (program != null && program.Status != newStatus)
+            {
+                Application.Current.Dispatcher.Invoke(() => program.Status = newStatus);
             }
         }
 

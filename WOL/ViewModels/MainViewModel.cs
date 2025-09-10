@@ -16,6 +16,7 @@ namespace WOL.ViewModels
     {
         private readonly IDataService _dataService;
         private readonly NewProjectViewModel _newProjectViewModel;
+        private readonly IProgramStatusService _programStatusService;
         private Project? _selectedProject;
 
         // --- 자식 ViewModel ---
@@ -43,10 +44,11 @@ namespace WOL.ViewModels
         public ICommand UpdateProjectCommand { get; }
         public ICommand DeleteProjectCommand { get; }
 
-        public MainViewModel(IDataService dataService, DeviceViewModel deviceViewModel, ProgramViewModel programViewModel, NewProjectViewModel newProjectViewModel)
+        public MainViewModel(IDataService dataService, DeviceViewModel deviceViewModel, ProgramViewModel programViewModel, NewProjectViewModel newProjectViewModel, IProgramStatusService programStatusService)
         {
             _dataService = dataService;
             _newProjectViewModel = newProjectViewModel;
+            _programStatusService = programStatusService;
 
             DeviceViewModel = deviceViewModel;
             ProgramViewModel = programViewModel;
@@ -56,6 +58,7 @@ namespace WOL.ViewModels
             UpdateProjectCommand = new RelayCommand<Project>(async (p) => await UpdateProjectAsync(p), (p) => p != null);
             DeleteProjectCommand = new RelayCommand<Project>(async (p) => await DeleteProjectAsync(p), (p) => p != null);
 
+            _programStatusService.Start();
             _ = LoadDataAsync();
         }
 

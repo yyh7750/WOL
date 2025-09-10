@@ -14,7 +14,8 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!--  전역 컨버터 등록  -->
-            <converters:StatusColorConverter x:Key="StatusColorConverter" />
+            <converters:DeviceStatusColorConverter x:Key="DeviceStatusColorConverter" />
+            <converters:ProgramStatusColorConverter x:Key="ProgramStatusColorConverter" />
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
             <converters:MultiValueConverter x:Key="MultiValueConverter" />

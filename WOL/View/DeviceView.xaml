@@ -53,7 +53,7 @@
                                         Margin="0,0,10,0"
                                         Padding="8,4"
                                         VerticalAlignment="Center"
-                                        Background="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                        Background="{Binding Status, Converter={StaticResource DeviceStatusColorConverter}}"
                                         CornerRadius="12"
                                         Cursor="Hand">
                                     <Border.InputBindings>

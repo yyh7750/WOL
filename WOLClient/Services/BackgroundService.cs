@@ -24,12 +24,14 @@ namespace WOLClient.Services
         private Task? _programTask;
 
         private TcpFileServer? _fileServer;
+        private CommandListenerService? _commandListenerService;
         private readonly IniService _iniService;
 
         public BackgroundService()
         {
             _cts = new CancellationTokenSource();
             _iniService = new IniService();
+            _commandListenerService = new CommandListenerService(_iniService);
         }
 
         public void Start()
@@ -51,6 +53,8 @@ namespace WOLClient.Services
             _fileServer.Start(port);
 
             _programTask = Task.Run(() => ListenForProgramSignalMessages(token), token);
+
+            _commandListenerService?.Start();
         }
 
         public async Task StopAsync()
@@ -93,6 +97,9 @@ namespace WOLClient.Services
 
             _fileServer?.Stop();
             _fileServer = null;
+
+            _commandListenerService?.Stop();
+            _commandListenerService = null;
 
             _cts?.Dispose();
             _cts = null;

@@ -8,6 +8,6 @@ namespace WOL.Services.Interface
         void StartProgramAsync(Device device, Program program);
         void StopProgramAsync(Device device, Program program);
         bool IsMyIpAddress(string ip);
-        Task SendProgramSignalAsync(Device device, Program program, bool isStart);
+        Task SendProgramSignalAsync(Device device, string runProgramPath, bool isStart);
     }
 }

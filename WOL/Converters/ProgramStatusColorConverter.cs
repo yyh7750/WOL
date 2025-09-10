@@ -1,25 +1,23 @@
-using WOL.Models;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
+using WOL.Models;
 
 namespace WOL.Converters
 {
-    public class StatusColorConverter : IValueConverter
+    class ProgramStatusColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is DeviceStatus status)
+            if (value is ProgramStatus status)
             {
                 switch (status)
                 {
-                    case DeviceStatus.Online:
+                    case ProgramStatus.Running:
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
-                    case DeviceStatus.Offline:
+                    case ProgramStatus.Stopped:
                         return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280"));
-                    case DeviceStatus.Checking:
-                        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B2B2B2"));
                 }
             }
 
