@@ -8,44 +8,49 @@ namespace WOL.Data.Repositories
 {
     public class DeviceRepository : IDeviceRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-        public DeviceRepository(AppDbContext context)
+        public DeviceRepository(IDbContextFactory<AppDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<List<Device>> GetAllDevicesAsync()
         {
-            return await _context.Device
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Device
                                  .Include(d => d.Programs)
                                  .ToListAsync();
         }
 
         public async Task<Device?> GetDeviceByIdAsync(int id)
         {
-            return await _context.Device
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Device
                                  .Include(d => d.Programs)
                                  .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task AddDeviceAsync(Device device)
         {
-            await _context.Device.AddAsync(device);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            await context.Device.AddAsync(device);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateDeviceAsync(Device device)
         {
-            _context.Device.Update(device);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            context.Device.Update(device);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteDeviceAsync(int id)
         {
-            Device? device = await _context.Device.FindAsync(id) ?? throw new KeyNotFoundException($"Device with ID {id} not found.");
-            _context.Device.Remove(device);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            Device? device = await context.Device.FindAsync(id) ?? throw new KeyNotFoundException($"Device with ID {id} not found.");
+            context.Device.Remove(device);
+            await context.SaveChangesAsync();
         }
     }
 }

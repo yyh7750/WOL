@@ -104,7 +104,8 @@ namespace WOL.Services
                 // Server PC는 항상 온라인 표시
                 if (_programService.IsMyIpAddress(device.IP))
                 {
-                    Application.Current.Dispatcher.Invoke(() => device.Status = DeviceStatus.Online);
+                    if (Application.Current == null) return;
+                        Application.Current.Dispatcher.Invoke(() => device.Status = DeviceStatus.Online);
                     continue;
                 }
 

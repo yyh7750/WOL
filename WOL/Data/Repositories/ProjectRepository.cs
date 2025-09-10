@@ -8,16 +8,17 @@ namespace WOL.Data.Repositories
 {
     public class ProjectRepository : IProjectRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-        public ProjectRepository(AppDbContext context)
+        public ProjectRepository(IDbContextFactory<AppDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<List<Project>> GetAllProjectsAsync()
         {
-            return await _context.Project
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Project
                                  .Include(p => p.Devices)
                                  .ThenInclude(d => d.Programs)
                                  .ToListAsync();
@@ -25,7 +26,8 @@ namespace WOL.Data.Repositories
 
         public async Task<Project?> GetProjectByIdAsync(int id)
         {
-            return await _context.Project
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Project
                                  .Include(p => p.Devices)
                                  .ThenInclude(d => d.Programs)
                                  .FirstOrDefaultAsync(p => p.Id == id);
@@ -33,22 +35,25 @@ namespace WOL.Data.Repositories
 
         public async Task AddProjectAsync(Project project)
         {
-            await _context.Project.AddAsync(project);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            await context.Project.AddAsync(project);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateProjectAsync(Project project)
         {
-            _context.Project.Update(project);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            context.Project.Update(project);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteProjectAsync(int id)
         {
-            Project? project = await _context.Project.FindAsync(id) 
+            using var context = await _contextFactory.CreateDbContextAsync();
+            Project? project = await context.Project.FindAsync(id)
                 ?? throw new KeyNotFoundException($"Project with ID {id} not found.");
-            _context.Project.Remove(project);
-            await _context.SaveChangesAsync();
+            context.Project.Remove(project);
+            await context.SaveChangesAsync();
         }
     }
 }

@@ -8,43 +8,48 @@ namespace WOL.Data.Repositories
 {
     public class ProgramRepository : IProgramRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-        public ProgramRepository(AppDbContext context)
+        public ProgramRepository(IDbContextFactory<AppDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<List<Program>> GetAllProgramsAsync()
         {
-            return await _context.Program
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Program
                                  .ToListAsync();
         }
 
         public async Task<Program?> GetProgramByIdAsync(int id)
         {
-            return await _context.Program
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Program
                                  .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task AddProgramAsync(Program program)
         {
-            await _context.Program.AddAsync(program);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            await context.Program.AddAsync(program);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateProgramAsync(Program program)
         {
-            _context.Program.Update(program);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            context.Program.Update(program);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteProgramAsync(int id)
         {
-            Program? program = await _context.Program.FindAsync(id)
+            using var context = await _contextFactory.CreateDbContextAsync();
+            Program? program = await context.Program.FindAsync(id)
                 ?? throw new KeyNotFoundException($"Program with ID {id} not found.");
-            _context.Program.Remove(program);
-            await _context.SaveChangesAsync();
+            context.Program.Remove(program);
+            await context.SaveChangesAsync();
         }
     }
 }

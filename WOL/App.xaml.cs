@@ -29,9 +29,9 @@ namespace WOL
             base.OnStartup(e);
 
             // 데이터베이스가 생성되었는지 확인
-            using (var scope = ServiceProvider.CreateScope())
+            var contextFactory = ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+            using (var dbContext = contextFactory.CreateDbContext())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 dbContext.Database.EnsureCreated();
             }
 
@@ -64,27 +64,27 @@ namespace WOL
         private static void ConfigureServices(IServiceCollection services)
         {
             string connectionString = "Server=localhost;Database=wol;Uid=root;Pwd=str123;";
-            services.AddDbContext<AppDbContext>(options =>
+            services.AddDbContextFactory<AppDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             );
 
             // 서비스 등록
             services.AddSingleton<IWakeOnLanService, WakeOnLanService>();
-            services.AddSingleton<IDataService, DataService>();
-            services.AddSingleton<IDeviceService, DeviceService>();
+            services.AddTransient<IDataService, DataService>();
+            services.AddTransient<IDeviceService, DeviceService>();
             services.AddSingleton<IIniService, IniService>();
             services.AddSingleton<IRemoteExplorerService, RemoteExplorerService>();
-            services.AddSingleton<IProgramService, ProgramService>();
-            services.AddSingleton<IProgramStatusService, ProgramStatusService>();
+            services.AddTransient<IProgramService, ProgramService>();
+            services.AddTransient<IProgramStatusService, ProgramStatusService>();
             services.AddSingleton<IUdpService, UdpService>();
 
             // TCP Client
             services.AddScoped<ITcpJsonClient, TcpJsonClient>();
-            
+
             // Repository 등록
-            services.AddSingleton<IProjectRepository, ProjectRepository>();
-            services.AddSingleton<IDeviceRepository, DeviceRepository>();
-            services.AddSingleton<IProgramRepository, ProgramRepository>();
+            services.AddTransient<IProjectRepository, ProjectRepository>();
+            services.AddTransient<IDeviceRepository, DeviceRepository>();
+            services.AddTransient<IProgramRepository, ProgramRepository>();
 
             // --- ViewModel 등록 ---
             services.AddTransient<MainViewModel>();
