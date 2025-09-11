@@ -1,36 +1,63 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Style x:Key="PrimaryButton" TargetType="Button">
+    <Style x:Key="BaseRoundedButton" TargetType="Button">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="MinWidth" Value="50" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            Opacity="1">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.9" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.8" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PrimaryButton"
+           BasedOn="{StaticResource BaseRoundedButton}"
+           TargetType="Button">
         <Setter Property="Background" Value="#007ACC" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Padding" Value="12,6" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
     </Style>
-
-    <Style x:Key="DangerButton" TargetType="Button">
+    <Style x:Key="DangerButton"
+           BasedOn="{StaticResource BaseRoundedButton}"
+           TargetType="Button">
         <Setter Property="Background" Value="#DC3545" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Padding" Value="12,6" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
     </Style>
-
-    <Style x:Key="WarningButton" TargetType="Button">
+    <Style x:Key="WarningButton"
+           BasedOn="{StaticResource BaseRoundedButton}"
+           TargetType="Button">
         <Setter Property="Background" Value="#FFC107" />
         <Setter Property="Foreground" Value="Black" />
-        <Setter Property="Padding" Value="12,6" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
     </Style>
-
-    <Style x:Key="SuccessButton" TargetType="Button">
+    <Style x:Key="SuccessButton"
+           BasedOn="{StaticResource BaseRoundedButton}"
+           TargetType="Button">
         <Setter Property="Background" Value="#28A745" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Padding" Value="12,6" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
     </Style>
 
 </ResourceDictionary>

@@ -32,14 +32,14 @@
                             <!--  디바이스 정보 및 제어 버튼  -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
+                                <StackPanel Grid.Column="1">
                                     <TextBlock Style="{StaticResource Heading3}" Text="{Binding Name}" />
                                     <TextBlock Margin="0,4,0,0"
                                                Style="{StaticResource BodyText}"
@@ -49,12 +49,12 @@
                                                Text="{Binding MAC}" />
                                 </StackPanel>
 
-                                <Border Grid.Column="1"
-                                        Margin="0,0,10,0"
+                                <Border Grid.Column="0"
+                                        Margin="0,0,30,0"
                                         Padding="8,4"
                                         VerticalAlignment="Center"
                                         Background="{Binding Status, Converter={StaticResource DeviceStatusColorConverter}}"
-                                        CornerRadius="12"
+                                        CornerRadius="4"
                                         Cursor="Hand">
                                     <Border.InputBindings>
                                         <MouseBinding Command="{Binding DataContext.CheckDeviceStatusCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -68,18 +68,21 @@
                                 </Border>
 
                                 <Button Grid.Column="2"
+                                        Height="50"
                                         Margin="0,0,8,0"
                                         Command="{Binding DataContext.ProgramViewModel.AddProgramCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                         CommandParameter="{Binding}"
-                                        Content="프로그램 추가"
+                                        Content="프로그램&#10;   추가"
                                         Style="{StaticResource PrimaryButton}" />
                                 <Button Grid.Column="3"
+                                        Height="50"
                                         Margin="0,0,8,0"
                                         Command="{Binding DataContext.UpdateDeviceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"
                                         Content="수정"
                                         Style="{StaticResource WarningButton}" />
                                 <Button Grid.Column="4"
+                                        Height="50"
                                         Command="{Binding DataContext.DeleteDeviceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"
                                         Content="삭제"

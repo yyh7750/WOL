@@ -71,11 +71,11 @@ namespace WOL
             // 서비스 등록
             services.AddSingleton<IWakeOnLanService, WakeOnLanService>();
             services.AddTransient<IDataService, DataService>();
-            services.AddTransient<IDeviceService, DeviceService>();
+            services.AddSingleton<IDeviceService, DeviceService>();
             services.AddSingleton<IIniService, IniService>();
             services.AddSingleton<IRemoteExplorerService, RemoteExplorerService>();
-            services.AddTransient<IProgramService, ProgramService>();
-            services.AddTransient<IProgramStatusService, ProgramStatusService>();
+            services.AddSingleton<IProgramService, ProgramService>();
+            services.AddSingleton<IProgramStatusService, ProgramStatusService>();
             services.AddSingleton<IUdpService, UdpService>();
 
             // TCP Client

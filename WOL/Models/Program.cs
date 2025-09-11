@@ -54,11 +54,16 @@ namespace WOL.Models
         public ProgramStatus Status
         {
             get => _status;
-            set => SetProperty(ref _status, value);
+            set
+            {
+                if (SetProperty(ref _status, value))
+                {
+                    OnPropertyChanged(nameof(StatusText));
+                }
+            }
         }
 
-        public string StatusText => Status == ProgramStatus.Running ? "실행 중" : "중지됨";
-        public string StatusColor => Status == ProgramStatus.Running ? "#10B981" : "#6B7280";
+        public string StatusText => Status == ProgramStatus.Running ? "On" : "Off";
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

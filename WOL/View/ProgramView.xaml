@@ -18,32 +18,32 @@
                             CornerRadius="6">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock MaxWidth="600"
+                            <StackPanel Grid.Column="1">
+                                <TextBlock FontFamily="Bold"
                                            FontWeight="Medium"
                                            Text="{Binding Name}" />
-                                <TextBlock MaxWidth="600"
-                                           Margin="0,2,0,0"
+                                <TextBlock Margin="0,2,0,0"
                                            Style="{StaticResource CaptionText}"
                                            Text="{Binding Path}" />
                             </StackPanel>
 
-                            <Border Grid.Column="1"
-                                    Margin="0,0,8,0"
-                                    Padding="6,2"
+                            <Border Grid.Column="0"
+                                    Margin="0,0,10,0"
+                                    Padding="8,4"
+                                    VerticalAlignment="Center"
                                     Background="{Binding Status, Converter={StaticResource ProgramStatusColorConverter}}"
-                                    CornerRadius="8">
-                                <TextBlock FontSize="10"
+                                    CornerRadius="4">
+                                <TextBlock FontSize="12"
                                            FontWeight="Medium"
                                            Foreground="{StaticResource White}"
-                                           Text="{Binding Status}" />
+                                           Text="{Binding StatusText}" />
                             </Border>
 
                             <Button Grid.Column="2"

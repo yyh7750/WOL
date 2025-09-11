@@ -8,7 +8,7 @@
         xmlns:viewmodels="clr-namespace:WOL.ViewModels"
         xmlns:views="clr-namespace:WOL.View"
         Title="WOL 원격 관리 시스템"
-        Width="1400"
+        Width="1500"
         Height="800"
         Background="{StaticResource Gray100}"
         WindowStartupLocation="CenterScreen"
@@ -119,13 +119,12 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <Button Grid.Column="1"
-                                                        Margin="12,0,0,0"
                                                         Command="{Binding DataContext.UpdateProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                         CommandParameter="{Binding}"
                                                         Content="수정"
                                                         Style="{StaticResource WarningButton}" />
                                                 <Button Grid.Column="2"
-                                                        Margin="12,0,0,0"
+                                                        Margin="8,0,0,0"
                                                         Command="{Binding DataContext.DeleteProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                         CommandParameter="{Binding}"
                                                         Content="삭제"
@@ -207,12 +206,14 @@
                                                        Style="{StaticResource BodyText}"
                                                        Text="디바이스 제어" />
                                             <StackPanel Orientation="Horizontal">
-                                                <Button Margin="0,0,8,0"
+                                                <Button Width="130"
+                                                        Margin="0,0,8,0"
                                                         Command="{Binding DeviceViewModel.WakeAllDevicesCommand}"
-                                                        Content="전체 Wake on LAN"
+                                                        Content="전체 Wake Up"
                                                         Style="{StaticResource SuccessButton}" />
-                                                <Button Command="{Binding DeviceViewModel.ShutdownAllDevicesCommand}"
-                                                        Content="전체 종료"
+                                                <Button Width="130"
+                                                        Command="{Binding DeviceViewModel.ShutdownAllDevicesCommand}"
+                                                        Content="전체 Shut Down"
                                                         Style="{StaticResource DangerButton}" />
                                             </StackPanel>
                                         </StackPanel>
@@ -222,11 +223,13 @@
                                                        Style="{StaticResource BodyText}"
                                                        Text="프로그램 제어" />
                                             <StackPanel Orientation="Horizontal">
-                                                <Button Margin="0,0,8,0"
+                                                <Button Width="130"
+                                                        Margin="0,0,8,0"
                                                         Command="{Binding ProgramViewModel.StartAllProgramsCommand}"
                                                         Content="모든 프로그램 실행"
                                                         Style="{StaticResource PrimaryButton}" />
-                                                <Button Command="{Binding ProgramViewModel.StopAllProgramsCommand}"
+                                                <Button Width="130"
+                                                        Command="{Binding ProgramViewModel.StopAllProgramsCommand}"
                                                         Content="모든 프로그램 중지"
                                                         Style="{StaticResource WarningButton}" />
                                             </StackPanel>
