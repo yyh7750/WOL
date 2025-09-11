@@ -50,13 +50,13 @@
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
             <Button Margin="0,0,8,0"
-                    Content="취소"
-                    IsCancel="True"
-                    Style="{StaticResource DangerButton}" />
-            <Button Command="{Binding SetDeviceInfoCommand}"
+                    Command="{Binding SetDeviceInfoCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                     Content="확인"
                     Style="{StaticResource PrimaryButton}" />
+            <Button Content="취소"
+                    IsCancel="True"
+                    Style="{StaticResource DangerButton}" />
         </StackPanel>
     </Grid>
 </Window>
