@@ -52,6 +52,19 @@ namespace WOL.Data.Repositories
             using var context = await _contextFactory.CreateDbContextAsync();
             Project? project = await context.Project.FindAsync(id)
                 ?? throw new KeyNotFoundException($"Project with ID {id} not found.");
+            
+            Device? device = await context.Device.FirstOrDefaultAsync(d => d.ProjectId == id);
+            if (device != null)
+            {
+                Program? program = await context.Program.FirstOrDefaultAsync(p => p.DeviceId == device.Id);
+
+                if (program != null)
+                {
+                    context.Program.Remove(program);
+                }
+                context.Device.Remove(device);
+            }
+            
             context.Project.Remove(project);
             await context.SaveChangesAsync();
         }
