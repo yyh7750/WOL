@@ -7,9 +7,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:WOL.ViewModels"
         xmlns:views="clr-namespace:WOL.View"
-        Title="WOL 원격 관리 시스템"
-        Width="1500"
-        Height="800"
+        Title="WOL Server (원격 관리 시스템)"
+        Width="1700"
+        Height="1100"
         Background="{StaticResource Gray100}"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
@@ -38,7 +38,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Style="{StaticResource Heading1}" Text="WOL 원격 관리 시스템" />
+                    <TextBlock Style="{StaticResource Heading1}" Text="WOL Server (원격 관리 시스템)" />
                     <TextBlock Margin="0,4,0,0"
                                Style="{StaticResource BodyText}"
                                Text="Wake on LAN 및 프로그램 원격 실행 관리" />
