@@ -3,6 +3,7 @@ using WOL.Data.Repositories.Interface;
 using WOL.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace WOL.Data.Repositories
 {
@@ -49,7 +50,17 @@ namespace WOL.Data.Repositories
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             Device? device = await context.Device.FindAsync(id) ?? throw new KeyNotFoundException($"Device with ID {id} not found.");
-            context.Device.Remove(device);
+            
+            if (device != null)
+            {
+                Program[]? programs = await context.Program.Where(p => p.DeviceId == device.Id).ToArrayAsync();
+                if (programs != null && programs.Length > 0)
+                {
+                    context.Program.RemoveRange(programs);
+                }
+            }
+
+            context.Device.Remove(device!);
             await context.SaveChangesAsync();
         }
     }

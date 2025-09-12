@@ -3,6 +3,7 @@ using WOL.Data.Repositories.Interface;
 using WOL.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace WOL.Data.Repositories
 {
@@ -52,17 +53,17 @@ namespace WOL.Data.Repositories
             using var context = await _contextFactory.CreateDbContextAsync();
             Project? project = await context.Project.FindAsync(id)
                 ?? throw new KeyNotFoundException($"Project with ID {id} not found.");
-            
-            Device? device = await context.Device.FirstOrDefaultAsync(d => d.ProjectId == id);
-            if (device != null)
-            {
-                Program? program = await context.Program.FirstOrDefaultAsync(p => p.DeviceId == device.Id);
 
-                if (program != null)
+            Device[]? devices = await context.Device.Where(d => d.ProjectId == project.Id).ToArrayAsync();
+            if (devices != null && devices.Length > 0)
+            {
+                Program[]? programs = await context.Program.Where(p => devices!.Select(d => d.Id).Contains(p.DeviceId)).ToArrayAsync();
+
+                if (programs != null && programs.Length > 0)
                 {
-                    context.Program.Remove(program);
+                    context.Program.RemoveRange(programs);
                 }
-                context.Device.Remove(device);
+                context.Device.RemoveRange(devices);
             }
             
             context.Project.Remove(project);
