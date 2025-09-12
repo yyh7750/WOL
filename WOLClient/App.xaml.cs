@@ -16,8 +16,8 @@ namespace WOLClient
 
             _notifyIcon = new()
             {
-                Icon = SystemIcons.Information,
-                Text = "WOLClient is running",
+                Icon = new Icon("Resources/WOL.ico"),
+                Text = "WOL Client",
                 Visible = true
             };
             _notifyIcon.DoubleClick += NotifyIconDoubleClick!;
