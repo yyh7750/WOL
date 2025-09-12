@@ -9,5 +9,6 @@ namespace WOL.Services.Interface
         void StopProgramAsync(Device device, Program program);
         bool IsMyIpAddress(string ip);
         Task SendProgramSignalAsync(Device device, string runProgramPath, bool isStart);
+        void TerminateSameNameProcesses(string exePath, int waitMs = 500);
     }
 }

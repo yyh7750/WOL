@@ -148,10 +148,7 @@ namespace WOL.ViewModels
             {
                 foreach (Program program in device.Programs)
                 {
-                    if (program.Status == ProgramStatus.Stopped)
-                    {
-                        _programService.StartProgramAsync(device, program);
-                    }
+                    _programService.StartProgramAsync(device, program);
                 }
             }
         }

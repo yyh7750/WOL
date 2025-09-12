@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using WOLClient.Models.Dto;
 using System.IO;
+using System.ComponentModel;
 
 namespace WOLClient.Services
 {
@@ -158,6 +159,8 @@ namespace WOLClient.Services
 
                             if (dto.IsStart)
                             {
+                                TerminateSameNameProcesses(dto.Path);
+
                                 try
                                 {
                                     Process.Start(new ProcessStartInfo
@@ -235,6 +238,40 @@ namespace WOLClient.Services
             {
                 Debug.WriteLine($"Error in HandleShutdownRequest: {ex.Message}");
             }
+        }
+
+        public void TerminateSameNameProcesses(string exePath, int waitMs = 500)
+        {
+            if (string.IsNullOrWhiteSpace(exePath)) return;
+
+            string procName = Path.GetFileNameWithoutExtension(exePath);
+            if (string.IsNullOrWhiteSpace(procName)) return;
+
+            int currentPid = Process.GetCurrentProcess().Id;
+            Process[] procs = Process.GetProcessesByName(procName);
+
+            foreach (Process p in procs)
+            {
+                try
+                {
+                    if (p.Id == currentPid) continue;
+
+                    if (p.MainWindowHandle != IntPtr.Zero)
+                    {
+                        p.CloseMainWindow();
+                        if (p.WaitForExit(waitMs)) continue;
+                    }
+
+                    p.Kill(entireProcessTree: true);
+                    p.WaitForExit(waitMs);
+                }
+                catch (InvalidOperationException) { /* 이미 종료됨 */ }
+                catch (Win32Exception) { /* 권한 부족 등 - 로깅만 */ }
+                catch (Exception) { /* 필요시 로깅 */ }
+            }
+
+            // 레이스 컨디션 방지: 잠깐 대기 후 동일 이름 프로세스 잔존 여부 재확인
+            Thread.Sleep(200);
         }
     }
 }

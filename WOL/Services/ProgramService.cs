@@ -10,6 +10,8 @@ using WOL.Models.Dto;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.ComponentModel;
+using System.Threading;
 
 namespace WOL.Services
 {
@@ -26,7 +28,6 @@ namespace WOL.Services
         public void StartProgramAsync(Device device, Program program)
         {
             string? runProgramPath = program.Path;
-
             if (string.IsNullOrEmpty(runProgramPath))
             {
                 throw new ArgumentException("The specified program does not belong to the given device.");
@@ -43,6 +44,8 @@ namespace WOL.Services
 
             if (IsMyIpAddress(device.IP))
             {
+                TerminateSameNameProcesses(runProgramPath);
+
                 ProcessStartInfo startInfo = new()
                 {
                     FileName = runProgramPath, // 파일 주소 및 파일명, 확장자까지 포함
@@ -146,6 +149,38 @@ namespace WOL.Services
             await _udpService.SendAsync(sendData);
         }
 
-        
+        public void TerminateSameNameProcesses(string exePath, int waitMs = 500)
+        {
+            if (string.IsNullOrWhiteSpace(exePath)) return;
+
+            string procName = Path.GetFileNameWithoutExtension(exePath);
+            if (string.IsNullOrWhiteSpace(procName)) return;
+
+            int currentPid = Process.GetCurrentProcess().Id;
+            Process[] procs = Process.GetProcessesByName(procName);
+
+            foreach (Process p in procs)
+            {
+                try
+                {
+                    if (p.Id == currentPid) continue;
+
+                    if (p.MainWindowHandle != IntPtr.Zero)
+                    {
+                        p.CloseMainWindow();
+                        if (p.WaitForExit(waitMs)) continue;
+                    }
+
+                    p.Kill(entireProcessTree: true);
+                    p.WaitForExit(waitMs);
+                }
+                catch (InvalidOperationException) { /* 이미 종료됨 */ }
+                catch (Win32Exception) { /* 권한 부족 등 - 로깅만 */ }
+                catch (Exception) { /* 필요시 로깅 */ }
+            }
+
+            // 레이스 컨디션 방지: 잠깐 대기 후 동일 이름 프로세스 잔존 여부 재확인
+            Thread.Sleep(200);
+        }
     }
 }
